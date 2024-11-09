@@ -151,5 +151,7 @@ time:
   - platform: sntp
     id: sntp_time
 
-# Enables exposure of built-in services to Home Assistant
+# Enable Home Assistant API
 api:
+  encryption:
+    key: ${api_key}
