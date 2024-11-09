@@ -67,4 +67,4 @@ async def to_code(config):
 
     cg.add_library("FastCRC", version=None, repository="https://github.com/vinnyspb/FastCRC.git")
     cg.add_library("comfortzone_heatpump", version=None,
-                   repository="https://github.com/qix67/comfortzone_heatpump.git")
+                   repository="https://github.com/pinussen/comfortzone_heatpump.git")
