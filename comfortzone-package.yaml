@@ -33,114 +33,114 @@ comfortzone:
 
 sensor:
   - platform: comfortzone
-    ${device_name}fan_time_to_filter_change:
+    fan_time_to_filter_change:
       name: "Days until filter change"
-    ${device_name}te0_outdoor_temp:
+    te0_outdoor_temp:
       name: "Outdoor temperature"
-    ${device_name}te1_flow_water:
+    te1_flow_water:
       name: "Flow water temperature"
-    ${device_name}te2_return_water:
+    te2_return_water:
       name: "Return water temperature"
-    ${device_name}te3_indoor_temp:
+    te3_indoor_temp:
       name: "Indoor temperature"
-    ${device_name}te4_hot_gas_temp:
+    te4_hot_gas_temp:
       name: "Hot gas temperature"
-    ${device_name}te5_exchanger_out:
+    te5_exchanger_out:
       name: "Exchanger out temperature"
-    ${device_name}te6_evaporator_in:
+    te6_evaporator_in:
       name: "Evaporator in temperature"
-    ${device_name}te7_exhaust_air:
+    te7_exhaust_air:
       name: "Exhaust air temperature"
-    ${device_name}te24_hot_water_temp:
+    te24_hot_water_temp:
       name: "Hot water temperature"
-    ${device_name}expansion_valve_calculated_setting:
+    expansion_valve_calculated_setting:
       name: "Expansion valve calculated setting"
-    ${device_name}expansion_valve_temperature_difference:
+    expansion_valve_temperature_difference:
       name: "Expansion valve temperature difference"
-    ${device_name}current_compressor_frequency:
+    current_compressor_frequency:
       name: "Current compressor frequency"
-    ${device_name}current_compressor_power:
+    current_compressor_power:
       name: "Current compressor power"
-    ${device_name}current_compressor_additional_power:
+    current_compressor_additional_power:
       name: "Current compressor additional power"
-    ${device_name}current_compressor_total_power:
+    current_compressor_total_power:
       name: "Current compressor total power"
-    ${device_name}current_compressor_input_power:
+    current_compressor_input_power:
       name: "Current compressor input power"
       id: current_compressor_input_power
-    ${device_name}current_compressor_heating_input_power:
+    current_compressor_heating_input_power:
       name: "Current compressor heating input power"
       id: current_compressor_heating_input_power
-    ${device_name}current_compressor_water_input_power:
+    current_compressor_water_input_power:
       name: "Current compressor water input power"
       id: current_compressor_water_input_power
-    ${device_name}compressor_energy:
+    compressor_energy:
       name: "Compressor energy"
-    ${device_name}add_energy:
+    add_energy:
       name: "Additional energy"
-    ${device_name}hot_water_energy:
+    hot_water_energy:
       name: "Hot water energy"
-    ${device_name}compressor_runtime:
+    compressor_runtime:
       name: "Compressor runtime"
-    ${device_name}total_runtime:
+    total_runtime:
       name: "Total runtime"
-    ${device_name}room_heating_setting:
+    room_heating_setting:
       name: "Room heating setting"
-    ${device_name}hot_water_setting:
+    hot_water_setting:
       name: "Hot water setting"
-    ${device_name}fan_speed_duty:
+    fan_speed_duty:
       name: "Fan speed duty"
-    ${device_name}hot_water_calculated_setting:
+    hot_water_calculated_setting:
       name: "Hot water calculated setting"
-    ${device_name}heating_cop:
+    heating_cop:
       name: "Heating CoP"
-    ${device_name}water_cop:
+    water_cop:
       name: "Hot Water CoP"
-    ${device_name}te3_indoor_temp_offset:
+    te3_indoor_temp_offset:
       name: "Indoor temperature sensor offset"
-    ${device_name}target_flow_water_temperature:
+    target_flow_water_temperature:
       name: "Target flow water temperature"
-  - platform: ${device_name}total_daily_energy
+  - platform: total_daily_energy
     name: "Total Daily Input Energy"
     power_id: current_compressor_input_power
-  - platform: ${device_name}total_daily_energy
+  - platform: total_daily_energy
     name: "Total Daily Heating Input Energy"
     power_id: current_compressor_heating_input_power
-  - platform: ${device_name}total_daily_energy
+  - platform: total_daily_energy
     name: "Total Daily Water Input Energy"
-    power_id: ${device_name}current_compressor_water_input_power
+    power_id: current_compressor_water_input_power
 
 binary_sensor:
   - platform: comfortzone
-    ${device_name}filter_alarm:
+    filter_alarm:
       name: "Filter alarm"
-    ${device_name}hot_water_production:
+    hot_water_production:
       name: "Hot water production"
-    ${device_name}room_heating_in_progress:
+    room_heating_in_progress:
       name: "Room heating in progress"
-    ${device_name}additional_power_enabled:
+    additional_power_enabled:
       name: "Additional power enabled"
-    ${device_name}defrost_enabled:
+    defrost_enabled:
       name: "Defrost enabled"
-    ${device_name}extra_hot_water_setting:
+    extra_hot_water_setting:
       name: "Extra hot water setting"
 
 text_sensor:
   - platform: comfortzone
-    ${device_name}compressor_activity:
+    compressor_activity:
       name: "Compressor activity"
-    ${device_name}mode:
+    mode:
       name: "Mode"
-    ${device_name}fan_speed:
+    fan_speed:
       name: "Fan speed"
-    ${device_name}hot_water_priority_setting:
+    hot_water_priority_setting:
       name: "Hot water priority setting"
 
 climate:
   - platform: comfortzone
-    ${device_name}heatpump_climate:
+    heatpump_climate:
       name: "ComfortZone EX50 heating"
-    ${device_name}water_heater_climate:
+    water_heater_climate:
       name: "ComfortZone EX50 hot water"
       visual:
         min_temperature: 30
