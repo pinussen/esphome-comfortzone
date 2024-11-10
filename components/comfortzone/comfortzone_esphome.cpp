@@ -7,7 +7,7 @@
 #include "esphome_rs485.h"
 
 #include "esphome/components/api/api_server.h"
-
+esp_log_level_set("*", ESP_LOG_DEBUG);
 namespace esphome::comfortzone
 {
   static const char *TAG = "ComfortzoneComponent";
@@ -633,7 +633,9 @@ namespace esphome::comfortzone
 
   void ComfortzoneComponent::enable_fireplace_mode()
   {
+    ESP_LOGD(TAG, "Entering enable_fireplace_mode()");
     set_fireplace_mode(true);
+    ESP_LOGD(TAG, "Exiting enable_fireplace_mode()");
   }
 
   void ComfortzoneComponent::disable_fireplace_mode()
@@ -644,6 +646,12 @@ namespace esphome::comfortzone
 
   void ComfortzoneComponent::set_fireplace_mode(bool enable)
   {
+    ESP_LOGD(TAG, "Entering set_fireplace_mode() with enable=%d", static_cast<int>(enable));
+    
+    if (heatpump_ == nullptr) {
+        ESP_LOGE(TAG, "Heatpump is not initialized!");
+        return;
+    }
     if (heatpump_->set_fireplace_mode(enable))
     {
       ESP_LOGI(TAG, "Fireplace mode: %d SUCCESS", static_cast<int>(enable));
@@ -652,5 +660,6 @@ namespace esphome::comfortzone
     {
       ESP_LOGE(TAG, "Fireplace mode: %d FAILED", static_cast<int>(enable));
     }
+    ESP_LOGD(TAG, "Exiting set_fireplace_mode()");    
   }
 }
