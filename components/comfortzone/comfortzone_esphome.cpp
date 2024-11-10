@@ -7,7 +7,7 @@
 #include "esphome_rs485.h"
 
 #include "esphome/components/api/api_server.h"
-esp_log_level_set("*", ESP_LOG_DEBUG);
+
 namespace esphome::comfortzone
 {
   static const char *TAG = "ComfortzoneComponent";
@@ -319,6 +319,9 @@ namespace esphome::comfortzone
   {
     heatpump_ = new comfortzone_heatpump(new EspHomeRS485Interface(this, re_de_pin_));
 
+    esp_log_level_set("*", ESP_LOG_DEBUG);
+    ESP_LOGI("Main", "Logging is working!");
+    ESP_LOGI(TAG, "Free heap: %d", esp_get_free_heap_size());
     auto &status = heatpump_->comfortzone_status;
 
 #ifdef USE_SENSOR
@@ -662,4 +665,9 @@ namespace esphome::comfortzone
     }
     ESP_LOGD(TAG, "Exiting set_fireplace_mode()");    
   }
+
+  void app_error_handler(int err_code, uint32_t line_num, const char *p_file_name) {
+    ESP_LOGE(TAG, "Error occurred! Code: %d, Line: %d, File: %s", err_code, line_num, p_file_name);
+  }
+
 }
