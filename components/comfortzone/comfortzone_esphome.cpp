@@ -319,7 +319,7 @@ namespace esphome::comfortzone
   {
     heatpump_ = new comfortzone_heatpump(new EspHomeRS485Interface(this, re_de_pin_));
 
-    esp_log_level_set("*", ESP_LOG_DEBUG);
+    //esp_log_level_set("*", ESP_LOG_DEBUG);
     ESP_LOGI("Main", "Logging is working!");
     ESP_LOGI(TAG, "Free heap: %d", esp_get_free_heap_size());
     auto &status = heatpump_->comfortzone_status;
