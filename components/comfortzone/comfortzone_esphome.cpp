@@ -656,14 +656,24 @@ namespace esphome::comfortzone
         ESP_LOGE(TAG, "Heatpump is not initialized!");
         return;
     }
-    if (heatpump_->set_fireplace_mode(enable))
-    {
-      ESP_LOGI(TAG, "Fireplace mode: %d SUCCESS", static_cast<int>(enable));
+    ESP_LOGD(TAG, "Heatpump is initialized!");
+
+//    if (heatpump_->set_fireplace_mode(enable))
+//    {
+//      ESP_LOGI(TAG, "Fireplace mode: %d SUCCESS", static_cast<int>(enable));
+//    }
+//    else
+//    {
+//      ESP_LOGE(TAG, "Fireplace mode: %d FAILED", static_cast<int>(enable));
+//    }
+
+    bool result = heatpump_->set_fireplace_mode(enable);
+    if (result) {
+        ESP_LOGI(TAG, "Fireplace mode: %d SUCCESS", static_cast<int>(enable));
+    } else {
+        ESP_LOGE(TAG, "Fireplace mode: %d FAILED", static_cast<int>(enable));
     }
-    else
-    {
-      ESP_LOGE(TAG, "Fireplace mode: %d FAILED", static_cast<int>(enable));
-    }
+    
     ESP_LOGD(TAG, "Exiting set_fireplace_mode()");    
   }
 
