@@ -637,6 +637,7 @@ namespace esphome::comfortzone
   void ComfortzoneComponent::enable_fireplace_mode()
   {
     ESP_LOGD(TAG, "Entering enable_fireplace_mode()");
+    ESP_LOGI(TAG, "Info logging);
     set_fireplace_mode(true);
     ESP_LOGD(TAG, "Exiting enable_fireplace_mode()");
   }
