@@ -10,7 +10,7 @@ external_components:
       url: https://github.com/pinussen/esphome-comfortzone
       ref: ${git_branch}
     components: [ comfortzone ]
-    refresh: "True"
+    refresh: "10m"
 
 # Tracks the current offset of the indoor temperature sensor
 globals:
