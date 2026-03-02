@@ -3,6 +3,7 @@ esphome:
     build_flags:
       - "-O3"
       - "-DHP_PROTOCOL=${comfortzone_protocol_version}"
+      - "-DUSE_API_USER_DEFINED_ACTIONS"
 
 external_components:
   - source:
@@ -151,8 +152,3 @@ climate:
 time:
   - platform: sntp
     id: sntp_time
-
-# Enable Home Assistant API
-api:
-  encryption:
-    key: ${api_key}
