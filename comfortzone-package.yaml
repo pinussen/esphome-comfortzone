@@ -3,6 +3,8 @@ esphome:
     build_flags:
       - "-O3"
       - "-DHP_PROTOCOL=${comfortzone_protocol_version}"
+      - "-DUSE_API_USER_DEFINED_ACTIONS"
+
 
 external_components:
   - source:
