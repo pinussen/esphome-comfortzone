@@ -2,13 +2,9 @@ import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import binary_sensor
 from esphome.const import (
-    ICON_FAN,
     DEVICE_CLASS_PROBLEM,
-    ICON_WATER,
-    ICON_HEATING_COIL,
-    ICON_GRAIN,
     DEVICE_CLASS_POWER,
-    DEVICE_CLASS_RUNNING
+    DEVICE_CLASS_RUNNING,
 )
 from . import (
     ComfortzoneComponent,
@@ -30,27 +26,27 @@ CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_COMFORTZONE_ID): cv.use_id(ComfortzoneComponent),
         cv.Optional(CONF_FILTER_ALARM): binary_sensor.binary_sensor_schema(
-            icon=ICON_FAN,
+            icon="mdi:fan",
             device_class=DEVICE_CLASS_PROBLEM,
         ),
         cv.Optional(CONF_HOT_WATER_PRODUCTION): binary_sensor.binary_sensor_schema(
-            icon=ICON_WATER,
+            icon="mdi:water",
             device_class=DEVICE_CLASS_RUNNING,
         ),
         cv.Optional(CONF_ROOM_HEATING_IN_PROGRESS): binary_sensor.binary_sensor_schema(
-            icon=ICON_HEATING_COIL,
+            icon="mdi:radiator",
             device_class=DEVICE_CLASS_RUNNING,
         ),
         cv.Optional(CONF_ADDITIONAL_POWER_ENABLED): binary_sensor.binary_sensor_schema(
-            icon=ICON_HEATING_COIL,
+            icon="mdi:radiator",
             device_class=DEVICE_CLASS_POWER,
         ),
         cv.Optional(CONF_DEFROST_ENABLED): binary_sensor.binary_sensor_schema(
-            icon=ICON_GRAIN,
+            icon="mdi:snowflake",
             device_class=DEVICE_CLASS_RUNNING,
         ),
         cv.Optional(CONF_EXTRA_HOT_WATER_SETTING): binary_sensor.binary_sensor_schema(
-            icon=ICON_HEATING_COIL,
+            icon="mdi:radiator",
             device_class=DEVICE_CLASS_POWER,
         ),
     }

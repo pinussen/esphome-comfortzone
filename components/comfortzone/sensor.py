@@ -4,23 +4,18 @@ from esphome.components import sensor
 from esphome.const import (
     DEVICE_CLASS_DURATION,
     STATE_CLASS_TOTAL,
-    ICON_FAN,
     UNIT_CELSIUS,
-    ICON_THERMOMETER,
     DEVICE_CLASS_TEMPERATURE,
     STATE_CLASS_MEASUREMENT,
     UNIT_HERTZ,
-    ICON_POWER,
     DEVICE_CLASS_FREQUENCY,
     UNIT_WATT,
     DEVICE_CLASS_POWER,
     UNIT_KILOWATT_HOURS,
     DEVICE_CLASS_ENERGY,
     UNIT_MINUTE,
-    ICON_TIMER,
     UNIT_PERCENT,
     UNIT_KELVIN,
-    ICON_HEATING_COIL
 )
 from . import (
     ComfortzoneComponent,
@@ -70,13 +65,13 @@ CONFIG_SCHEMA = cv.Schema(
         cv.GenerateID(CONF_COMFORTZONE_ID): cv.use_id(ComfortzoneComponent),
         cv.Optional(CONF_FAN_TIME_TO_FILTER_CHANGE): sensor.sensor_schema(
             unit_of_measurement=UNIT_DAY,
-            icon=ICON_FAN,
+            icon="mdi:fan",
             device_class=DEVICE_CLASS_DURATION,
             state_class=STATE_CLASS_TOTAL,
         ),
         cv.Optional(CONF_TE0_OUTDOOR_TEMP): sensor.sensor_schema(
             unit_of_measurement=UNIT_CELSIUS,
-            icon=ICON_THERMOMETER,
+            icon="mdi:thermometer",
             accuracy_decimals=1,
             device_class=DEVICE_CLASS_TEMPERATURE,
             state_class=STATE_CLASS_MEASUREMENT,
@@ -139,13 +134,13 @@ CONFIG_SCHEMA = cv.Schema(
         ),
         cv.Optional(CONF_CURRENT_COMPRESSOR_FREQUENCY): sensor.sensor_schema(
             unit_of_measurement=UNIT_HERTZ,
-            icon=ICON_POWER,
+            icon="mdi:speedometer",
             device_class=DEVICE_CLASS_FREQUENCY,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
         cv.Optional(CONF_CURRENT_COMPRESSOR_POWER): sensor.sensor_schema(
             unit_of_measurement=UNIT_WATT,
-            icon=ICON_POWER,
+            icon="mdi:flash",
             device_class=DEVICE_CLASS_POWER,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
@@ -199,7 +194,7 @@ CONFIG_SCHEMA = cv.Schema(
         ),
         cv.Optional(CONF_COMPRESSOR_RUNTIME): sensor.sensor_schema(
             unit_of_measurement=UNIT_MINUTE,
-            icon=ICON_TIMER,
+            icon="mdi:timer",
             device_class=DEVICE_CLASS_DURATION,
             state_class=STATE_CLASS_TOTAL,
         ),

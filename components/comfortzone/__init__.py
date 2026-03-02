@@ -48,7 +48,7 @@ CONFIG_SCHEMA = cv.Schema(
     }
 ).extend(uart.UART_DEVICE_SCHEMA)
 FINAL_VALIDATE_SCHEMA = uart.final_validate_device_schema(
-    "comfortzone", baud_rate=19200, require_tx=True, require_rx=True, data_bits=8, parity="NONE", stop_bits=1
+    "comfortzone", baud_rate=19200, require_tx=True, require_rx=True
 )
 
 

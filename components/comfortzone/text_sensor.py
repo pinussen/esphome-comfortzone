@@ -1,9 +1,7 @@
 import esphome.codegen as cg
 import esphome.config_validation as cv
 from esphome.components import text_sensor
-from esphome.const import (
-    ICON_HEATING_COIL, ICON_FAN, ICON_WATER
-)
+# icons replaced with mdi strings for compatibility; no direct ICON_* imports
 from . import (
     ComfortzoneComponent,
 )
@@ -22,16 +20,16 @@ CONFIG_SCHEMA = cv.Schema(
     {
         cv.GenerateID(CONF_COMFORTZONE_ID): cv.use_id(ComfortzoneComponent),
         cv.Optional(CONF_COMPRESSOR_ACTIVITY): text_sensor.text_sensor_schema(
-            icon=ICON_HEATING_COIL,
+            icon="mdi:radiator",
         ),
         cv.Optional(CONF_MODE): text_sensor.text_sensor_schema(
-            icon=ICON_HEATING_COIL,
+            icon="mdi:radiator",
         ),
         cv.Optional(CONF_FAN_SPEED): text_sensor.text_sensor_schema(
-            icon=ICON_FAN,
+            icon="mdi:fan",
         ),
         cv.Optional(CONF_HOT_WATER_PRIORITY_SETTING): text_sensor.text_sensor_schema(
-            icon=ICON_WATER,
+            icon="mdi:water",
         ),
     }
 )
