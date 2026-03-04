@@ -41,7 +41,7 @@ substitutions:
   git_branch: "main"
 
 packages:
-  comfortzone_package: github://vinnyspb/esphome-comfortzone/comfortzone-package.yaml@${git_branch}
+  comfortzone_package: github://pinussen/esphome-comfortzone/comfortzone-package.yaml@${git_branch}
 
 esphome:
   # Choose a hostname for the ESP32 board on your network
@@ -63,6 +63,11 @@ logger:
   # Enable if required for debugging (DEBUG, INFO, ERROR levels).
   level: NONE
 
+api:
+  encryption:
+    key: !secret api_key
+  custom_services: true
+
 ota:
   - platform: esphome
     password: !secret ota_password
@@ -77,6 +82,7 @@ wifi:
 Put a `secrets.yaml` file to the same directory which should contain all the necessary credentials:
 
 ```yaml
+api_key: "base64-encoded API encryption key"
 wifi_ssid: "wifi network name"
 wifi_password: "wifi password"
 ota_password: "create a random password for OTA updates through ESPHome"

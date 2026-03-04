@@ -118,8 +118,8 @@ namespace esphome::comfortzone
     void dump_config() override;
 
 #ifdef USE_API
-    void debug_reroute(std::string ip, int port, int timeout);
-    void set_sensor_offset(int sensor_num, float temp_offset); // sensor: [0:7], offset in °C (-10.0° -> 10.0°)
+    void debug_reroute(std::string ip, float port, float timeout);
+    void set_sensor_offset(float sensor_num, float temp_offset); // sensor: [0:7], offset in °C (-10.0° -> 10.0°)
     void override_indoor_temperature(float temp);
     void enable_fireplace_mode();
     void disable_fireplace_mode();

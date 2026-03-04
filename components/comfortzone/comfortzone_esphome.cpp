@@ -546,9 +546,12 @@ namespace esphome::comfortzone
   }
 
 #ifdef USE_API
-  void ComfortzoneComponent::debug_reroute(std::string ip, int port, int timeout)
+  void ComfortzoneComponent::debug_reroute(std::string ip, float port, float timeout)
   {
-    debug_until_ = std::chrono::system_clock::now() + std::chrono::seconds(timeout);
+    const int port_i = static_cast<int>(port);
+    const int timeout_i = static_cast<int>(timeout);
+
+    debug_until_ = std::chrono::system_clock::now() + std::chrono::seconds(timeout_i);
     heatpump_->set_grab_buffer(grab_buffer_, 256, &grab_frame_size_);
 
     memset(&src_addr_, 0, sizeof(src_addr_));
@@ -558,7 +561,7 @@ namespace esphome::comfortzone
 
     dest_addr_.sin_addr.s_addr = inet_addr(ip.c_str());
     dest_addr_.sin_family = AF_INET;
-    dest_addr_.sin_port = htons(port);
+    dest_addr_.sin_port = htons(port_i);
 
     sock_ = socket::socket(AF_INET, SOCK_DGRAM, IPPROTO_IP);
     if (!sock_)
@@ -575,14 +578,16 @@ namespace esphome::comfortzone
       return;
     }
 
-    ESP_LOGI(TAG, "Debugging enabled, forwarding to %s:%d for %d seconds", ip.c_str(), port, timeout);
+    ESP_LOGI(TAG, "Debugging enabled, forwarding to %s:%d for %d seconds", ip.c_str(), port_i, timeout_i);
   }
 
-  void ComfortzoneComponent::set_sensor_offset(int sensor_num, float temp_offset) // sensor: [0:7], offset in °C (-10.0° -> 10.0°)
+  void ComfortzoneComponent::set_sensor_offset(float sensor_num, float temp_offset) // sensor: [0:7], offset in °C (-10.0° -> 10.0°)
   {
-    if (sensor_num < 0 || sensor_num > 7)
+    const int sensor_num_i = static_cast<int>(sensor_num);
+
+    if (sensor_num_i < 0 || sensor_num_i > 7)
     {
-      ESP_LOGE(TAG, "Invalid sensor number %d", sensor_num);
+      ESP_LOGE(TAG, "Invalid sensor number %d", sensor_num_i);
       return;
     }
 
@@ -592,14 +597,14 @@ namespace esphome::comfortzone
       return;
     }
 
-    if (heatpump_->set_sensor_offset(sensor_num, temp_offset))
+    if (heatpump_->set_sensor_offset(sensor_num_i, temp_offset))
     {
-      ESP_LOGI(TAG, "Set sensor %d offset to %f", sensor_num, temp_offset);
+      ESP_LOGI(TAG, "Set sensor %d offset to %f", sensor_num_i, temp_offset);
       return;
     }
     else
     {
-      ESP_LOGE(TAG, "Failed to set sensor %d offset to %f", sensor_num, temp_offset);
+      ESP_LOGE(TAG, "Failed to set sensor %d offset to %f", sensor_num_i, temp_offset);
       return;
     }
   }

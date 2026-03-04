@@ -21,7 +21,10 @@ If you plan to modify the comfortzone component itself, edit the
 
 ```yaml
 external_components:
-  - source: components
+  - source:
+      type: local
+      path: ./components
+    components: [ comfortzone ]
 ```
 
 Builds can be done the same way as for a production build:
