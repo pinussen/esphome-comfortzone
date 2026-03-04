@@ -597,20 +597,32 @@ namespace esphome::comfortzone
       return;
     }
 
-    if (heatpump_->set_sensor_offset(sensor_num_i, temp_offset))
-    {
-      ESP_LOGI(TAG, "Set sensor %d offset to %f", sensor_num_i, temp_offset);
-      return;
-    }
-    else
-    {
-      ESP_LOGE(TAG, "Failed to set sensor %d offset to %f", sensor_num_i, temp_offset);
-      return;
-    }
+    this->set_timeout(0, [this, sensor_num_i, temp_offset]() {
+      if (heatpump_ == nullptr)
+      {
+        ESP_LOGE(TAG, "Heatpump is not initialized");
+        return;
+      }
+
+      if (heatpump_->set_sensor_offset(sensor_num_i, temp_offset))
+      {
+        ESP_LOGI(TAG, "Set sensor %d offset to %f", sensor_num_i, temp_offset);
+      }
+      else
+      {
+        ESP_LOGE(TAG, "Failed to set sensor %d offset to %f", sensor_num_i, temp_offset);
+      }
+    });
   }
 
   void ComfortzoneComponent::override_indoor_temperature(float temp)
   {
+    if (heatpump_ == nullptr || te3_offset_ == nullptr || sensors_te3_indoor_temp_ == nullptr || sensors_te3_indoor_temp_offset_ == nullptr)
+    {
+      ESP_LOGE(TAG, "override_indoor_temperature called before component initialization");
+      return;
+    }
+
     if (!sensors_te3_indoor_temp_->has_state() || (std::chrono::system_clock::now() - last_indoor_temperature_override_) < std::chrono::minutes(5))
     {
       return;
@@ -625,31 +637,38 @@ namespace esphome::comfortzone
 
     ESP_LOGE(TAG, "Calculated indoor temperature offset %.1f (heatpump reported %.1f, overriding with %.1f)", offset, sensors_te3_indoor_temp_->state, temp);
 
-    if (heatpump_->set_sensor_offset(3, offset))
-    {
-      ESP_LOGE(TAG, "Set successful");
-    }
-    else
-    {
-      ESP_LOGE(TAG, "Failed");
-    }
+    this->set_timeout(0, [this, offset]() {
+      if (heatpump_ == nullptr || te3_offset_ == nullptr || sensors_te3_indoor_temp_offset_ == nullptr)
+      {
+        ESP_LOGE(TAG, "override_indoor_temperature execution aborted due to uninitialized state");
+        return;
+      }
 
-    last_indoor_temperature_override_ = std::chrono::system_clock::now();
-    id(te3_offset_) = offset;
-    sensors_te3_indoor_temp_offset_->publish_state(offset);
+      if (heatpump_->set_sensor_offset(3, offset))
+      {
+        ESP_LOGE(TAG, "Set successful");
+      }
+      else
+      {
+        ESP_LOGE(TAG, "Failed");
+      }
+
+      last_indoor_temperature_override_ = std::chrono::system_clock::now();
+      id(te3_offset_) = offset;
+      sensors_te3_indoor_temp_offset_->publish_state(offset);
+    });
   }
 
   void ComfortzoneComponent::enable_fireplace_mode()
   {
-    ESP_LOGD(TAG, "Entering enable_fireplace_mode()");
-    ESP_LOGI(TAG, "Info logging");
-    set_fireplace_mode(true);
-    ESP_LOGD(TAG, "Exiting enable_fireplace_mode()");
+    ESP_LOGD(TAG, "Scheduling enable_fireplace_mode()");
+    this->set_timeout(0, [this]() { set_fireplace_mode(true); });
   }
 
   void ComfortzoneComponent::disable_fireplace_mode()
   {
-    set_fireplace_mode(false);
+    ESP_LOGD(TAG, "Scheduling disable_fireplace_mode()");
+    this->set_timeout(0, [this]() { set_fireplace_mode(false); });
   }
 #endif
 
