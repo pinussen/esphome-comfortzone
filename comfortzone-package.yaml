@@ -152,11 +152,4 @@ climate:
 time:
   - platform: sntp
     id: sntp_time
-<<<<<<< HEAD
-=======
 
-# Enable Home Assistant API
-api:
-  encryption:
-    key: ${api_key}
->>>>>>> 07eef03 (Add user-defined actions build flag)
