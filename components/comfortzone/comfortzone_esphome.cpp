@@ -184,24 +184,24 @@ namespace esphome::comfortzone
 #ifdef USE_CLIMATE
   void ComfortzoneHeatpumpClimate::control(const climate::ClimateCall &call)
   {
-    // if (call.get_mode().has_value())
-    // {
-    //   // User requested mode change
-    //   ClimateMode mode = *call.get_mode();
-    //   // Send mode to hardware
-    //   // ...
+    if (!parent_ || !parent_->get_heatpump())
+    {
+      return;
+    }
 
-    //   // Publish updated state
-    //   this->mode = mode;
-    //   this->publish_state();
-    // }
-    // if (call.get_target_temperature().has_value())
-    // {
-    //   // User requested target temperature change
-    //   float temp = *call.get_target_temperature();
-    //   // Send target temp to climate
-    //   // ...
-    // }
+    if (call.get_target_temperature().has_value())
+    {
+      float temp = *call.get_target_temperature();
+      if (parent_->get_heatpump()->set_room_temperature(temp))
+      {
+        this->target_temperature = temp;
+        this->publish_state();
+      }
+      else
+      {
+        ESP_LOGW(TAG, "Room heating write failed to %.1f°C: %s", temp, parent_->get_heatpump()->last_message);
+      }
+    }
   }
 
   climate::ClimateTraits ComfortzoneHeatpumpClimate::traits()
@@ -213,26 +213,31 @@ namespace esphome::comfortzone
     return traits;
   }
 
+  void ComfortzoneHeatpumpClimate::set_parent(ComfortzoneComponent *parent)
+  {
+    parent_ = parent;
+  }
+
   void ComfortzoneWaterHeaterClimate::control(const climate::ClimateCall &call)
   {
-    // if (call.get_mode().has_value())
-    // {
-    //   // User requested mode change
-    //   ClimateMode mode = *call.get_mode();
-    //   // Send mode to hardware
-    //   // ...
+    if (!parent_ || !parent_->get_heatpump())
+    {
+      return;
+    }
 
-    //   // Publish updated state
-    //   this->mode = mode;
-    //   this->publish_state();
-    // }
-    // if (call.get_target_temperature().has_value())
-    // {
-    //   // User requested target temperature change
-    //   float temp = *call.get_target_temperature();
-    //   // Send target temp to climate
-    //   // ...
-    // }
+    if (call.get_target_temperature().has_value())
+    {
+      float temp = *call.get_target_temperature();
+      if (parent_->get_heatpump()->set_hot_water_temperature(temp))
+      {
+        this->target_temperature = temp;
+        this->publish_state();
+      }
+      else
+      {
+        ESP_LOGW(TAG, "Hot water write failed to %.1f°C: %s", temp, parent_->get_heatpump()->last_message);
+      }
+    }
   }
 
   climate::ClimateTraits ComfortzoneWaterHeaterClimate::traits()
@@ -242,6 +247,11 @@ namespace esphome::comfortzone
     traits.set_supports_current_temperature(true);
     traits.set_supported_modes({climate::CLIMATE_MODE_HEAT, climate::CLIMATE_MODE_OFF});
     return traits;
+  }
+
+  void ComfortzoneWaterHeaterClimate::set_parent(ComfortzoneComponent *parent)
+  {
+    parent_ = parent;
   }
 #endif
 
@@ -311,8 +321,18 @@ namespace esphome::comfortzone
 #endif
 
 #ifdef USE_CLIMATE
-  void ComfortzoneComponent::set_heatpump_climate(ComfortzoneHeatpumpClimate *heatpump_climate) { this->heatpump_climate_ = heatpump_climate; }
-  void ComfortzoneComponent::set_water_heater_climate(ComfortzoneWaterHeaterClimate *water_heater_climate) { this->water_heater_climate_ = water_heater_climate; }
+  void ComfortzoneComponent::set_heatpump_climate(ComfortzoneHeatpumpClimate *heatpump_climate)
+  {
+    this->heatpump_climate_ = heatpump_climate;
+    if (heatpump_climate_)
+      heatpump_climate_->set_parent(this);
+  }
+  void ComfortzoneComponent::set_water_heater_climate(ComfortzoneWaterHeaterClimate *water_heater_climate)
+  {
+    this->water_heater_climate_ = water_heater_climate;
+    if (water_heater_climate_)
+      water_heater_climate_->set_parent(this);
+  }
 #endif
 
   void ComfortzoneComponent::setup()
@@ -455,6 +475,7 @@ namespace esphome::comfortzone
 #endif
 
     heatpump_->begin();
+    heatpump_->enable_debug_mode(true);
   }
 
   void ComfortzoneComponent::loop()

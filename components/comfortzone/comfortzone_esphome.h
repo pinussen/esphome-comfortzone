@@ -30,12 +30,16 @@ class comfortzone_heatpump;
 
 namespace esphome::comfortzone
 {
+class ComfortzoneComponent;
 #ifdef USE_CLIMATE
   class ComfortzoneHeatpumpClimate : public climate::Climate
   {
   public:
     void control(const climate::ClimateCall &call) override;
     climate::ClimateTraits traits() override;
+    void set_parent(ComfortzoneComponent *parent);
+  private:
+    ComfortzoneComponent *parent_{nullptr};
   };
 
   class ComfortzoneWaterHeaterClimate : public climate::Climate
@@ -43,6 +47,9 @@ namespace esphome::comfortzone
   public:
     void control(const climate::ClimateCall &call) override;
     climate::ClimateTraits traits() override;
+    void set_parent(ComfortzoneComponent *parent);
+  private:
+    ComfortzoneComponent *parent_{nullptr};
   };
 #endif
 
@@ -114,6 +121,7 @@ namespace esphome::comfortzone
     void set_heatpump_climate(ComfortzoneHeatpumpClimate *heatpump_climate);
     void set_water_heater_climate(ComfortzoneWaterHeaterClimate *water_heater_climate);
 #endif
+    comfortzone_heatpump *get_heatpump() const;
 
     void dump_config() override;
 
