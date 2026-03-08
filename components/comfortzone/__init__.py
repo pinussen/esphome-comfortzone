@@ -68,5 +68,5 @@ async def to_code(config):
         cg.add(var.set_te3_offset_global(var_global_offset))
 
     cg.add_library("FastCRC", version=None, repository="https://github.com/vinnyspb/FastCRC.git")
-    library_path = (Path(__file__).resolve().parents[2] / "third_party" / "comfortzone_heatpump").as_uri()
+    library_path = (Path(__file__).resolve().parent / "third_party" / "comfortzone_heatpump").as_uri()
     cg.add_library("comfortzone_heatpump", version=None, repository=library_path)
