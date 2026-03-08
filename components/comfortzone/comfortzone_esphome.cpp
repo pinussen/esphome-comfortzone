@@ -333,6 +333,11 @@ namespace esphome::comfortzone
     if (water_heater_climate_)
       water_heater_climate_->set_parent(this);
   }
+
+  comfortzone_heatpump *ComfortzoneComponent::get_heatpump() const
+  {
+    return heatpump_;
+  }
 #endif
 
   void ComfortzoneComponent::setup()
