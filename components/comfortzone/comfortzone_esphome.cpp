@@ -184,14 +184,17 @@ namespace esphome::comfortzone
 #ifdef USE_CLIMATE
   void ComfortzoneHeatpumpClimate::control(const climate::ClimateCall &call)
   {
+    ESP_LOGI(TAG, "HeatpumpClimate::control() called");
     if (!parent_ || !parent_->get_heatpump())
     {
+      ESP_LOGE(TAG, "HeatpumpClimate::control() - no parent or heatpump!");
       return;
     }
 
     if (call.get_target_temperature().has_value())
     {
       float temp = *call.get_target_temperature();
+      ESP_LOGI(TAG, "HeatpumpClimate: setting room temp to %.1f°C", temp);
       if (parent_->get_heatpump()->set_room_temperature(temp))
       {
         this->target_temperature = temp;
@@ -220,14 +223,17 @@ namespace esphome::comfortzone
 
   void ComfortzoneWaterHeaterClimate::control(const climate::ClimateCall &call)
   {
+    ESP_LOGI(TAG, "WaterHeaterClimate::control() called");
     if (!parent_ || !parent_->get_heatpump())
     {
+      ESP_LOGE(TAG, "WaterHeaterClimate::control() - no parent or heatpump!");
       return;
     }
 
     if (call.get_target_temperature().has_value())
     {
       float temp = *call.get_target_temperature();
+      ESP_LOGI(TAG, "WaterHeaterClimate: setting hot water temp to %.1f°C", temp);
       if (parent_->get_heatpump()->set_hot_water_temperature(temp))
       {
         this->target_temperature = temp;
