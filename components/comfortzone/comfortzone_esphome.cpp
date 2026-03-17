@@ -184,17 +184,17 @@ namespace esphome::comfortzone
 #ifdef USE_CLIMATE
   void ComfortzoneHeatpumpClimate::control(const climate::ClimateCall &call)
   {
-    ESP_LOGI(TAG, "HeatpumpClimate::control() called");
+    ESP_LOGI("comfortzone", "HeatpumpClimate::control() called");
     if (!parent_ || !parent_->get_heatpump())
     {
-      ESP_LOGE(TAG, "HeatpumpClimate::control() - no parent or heatpump!");
+      ESP_LOGE("comfortzone", "HeatpumpClimate::control() - no parent or heatpump!");
       return;
     }
 
     if (call.get_target_temperature().has_value())
     {
       float temp = *call.get_target_temperature();
-      ESP_LOGI(TAG, "HeatpumpClimate: setting room temp to %.1f°C", temp);
+      ESP_LOGI("comfortzone", "HeatpumpClimate: setting room temp to %.1f°C", temp);
       if (parent_->get_heatpump()->set_room_temperature(temp))
       {
         this->target_temperature = temp;
@@ -202,7 +202,7 @@ namespace esphome::comfortzone
       }
       else
       {
-        ESP_LOGW(TAG, "Room heating write failed to %.1f°C: %s", temp, parent_->get_heatpump()->last_message);
+        ESP_LOGW("comfortzone", "Room heating write failed to %.1f°C: %s", temp, parent_->get_heatpump()->last_message);
       }
     }
   }
@@ -223,17 +223,17 @@ namespace esphome::comfortzone
 
   void ComfortzoneWaterHeaterClimate::control(const climate::ClimateCall &call)
   {
-    ESP_LOGI(TAG, "WaterHeaterClimate::control() called");
+    ESP_LOGI("comfortzone", "WaterHeaterClimate::control() called");
     if (!parent_ || !parent_->get_heatpump())
     {
-      ESP_LOGE(TAG, "WaterHeaterClimate::control() - no parent or heatpump!");
+      ESP_LOGE("comfortzone", "WaterHeaterClimate::control() - no parent or heatpump!");
       return;
     }
 
     if (call.get_target_temperature().has_value())
     {
       float temp = *call.get_target_temperature();
-      ESP_LOGI(TAG, "WaterHeaterClimate: setting hot water temp to %.1f°C", temp);
+      ESP_LOGI("comfortzone", "WaterHeaterClimate: setting hot water temp to %.1f°C", temp);
       if (parent_->get_heatpump()->set_hot_water_temperature(temp))
       {
         this->target_temperature = temp;
@@ -241,7 +241,7 @@ namespace esphome::comfortzone
       }
       else
       {
-        ESP_LOGW(TAG, "Hot water write failed to %.1f°C: %s", temp, parent_->get_heatpump()->last_message);
+        ESP_LOGW("comfortzone", "Hot water write failed to %.1f°C: %s", temp, parent_->get_heatpump()->last_message);
       }
     }
   }
