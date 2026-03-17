@@ -5,13 +5,7 @@ esphome:
       - "-DHP_PROTOCOL=${comfortzone_protocol_version}"
       - "-DUSE_API_USER_DEFINED_ACTIONS"
 
-external_components:
-  - source:
-      type: git
-      url: https://github.com/pinussen/esphome-comfortzone
-      ref: ${git_branch}
-    components: [ comfortzone ]
-    refresh: "10min"
+# external_components hanteras av comfortzone-bjwl.yaml för lokal utveckling
 
 # Tracks the current offset of the indoor temperature sensor
 globals:
@@ -152,11 +146,3 @@ climate:
 time:
   - platform: sntp
     id: sntp_time
-<<<<<<< HEAD
-=======
-
-# Enable Home Assistant API
-api:
-  encryption:
-    key: ${api_key}
->>>>>>> 07eef03 (Add user-defined actions build flag)
