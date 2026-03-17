@@ -9,7 +9,7 @@ external_components:
   - source:
       type: git
       url: https://github.com/pinussen/esphome-comfortzone
-      ref: ${git_commit_hash}
+      ref: ${git_branch}
     components: [ comfortzone ]
     refresh: 0s
 
