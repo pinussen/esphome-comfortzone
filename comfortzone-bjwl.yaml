@@ -8,9 +8,7 @@
   git_commit_hash: "bb5fd3ca5d138922357528879ee6ab00f6184e73"
 
 packages:
-  comfortzone_package:
-    url: github://pinussen/esphome-comfortzone/comfortzone-package.yaml@${git_branch}
-    refresh: 0s
+  comfortzone_package: github://pinussen/esphome-comfortzone/comfortzone-package.yaml@fix/api-service-crash-guard
 
 esphome:
   name: comfortzone
