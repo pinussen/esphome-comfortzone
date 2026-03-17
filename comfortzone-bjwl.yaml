@@ -12,12 +12,6 @@ packages:
     url: github://pinussen/esphome-comfortzone/comfortzone-package.yaml@${git_branch}
     refresh: 0s
 
-external_components:
-  - source:
-      type: local
-      path: components
-    components: [ comfortzone ]
-
 esphome:
   name: comfortzone
   platformio_options:
