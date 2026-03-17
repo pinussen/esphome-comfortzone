@@ -5,7 +5,7 @@
   comfortzone_protocol_version: "170"
   device_name: "Comfortzone_"
   git_branch: "fix/api-service-crash-guard"
-  git_commit_hash: "bb5fd3ca5d138922357528879ee6ab00f6184e73"
+  git_commit_hash: "b1a00b743da90bbbac8244ce0884d9812bc0465f"
 
 packages:
   comfortzone_package: github://pinussen/esphome-comfortzone/comfortzone-package.yaml@fix/api-service-crash-guard
