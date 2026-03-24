@@ -56,6 +56,9 @@ async def to_code(config):
     var = cg.new_Pvariable(config[CONF_COMFORTZONE_ID])
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
+    
+    # Enable API support for custom services
+    cg.add_define("USE_API")
 
     if CONF_RE_DE_PIN in config and config[CONF_RE_DE_PIN]:
         re_de_pin = await cg.gpio_pin_expression(config[CONF_RE_DE_PIN])

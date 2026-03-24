@@ -317,6 +317,7 @@ namespace esphome::comfortzone
 
   void ComfortzoneComponent::setup()
   {
+    esp_log_level_set(TAG, ESP_LOG_DEBUG);
     ESP_LOGI(TAG, "setup() called - START");
     
     heatpump_ = new comfortzone_heatpump(new EspHomeRS485Interface(this, re_de_pin_));
