@@ -317,6 +317,8 @@ namespace esphome::comfortzone
 
   void ComfortzoneComponent::setup()
   {
+    ESP_LOGI(TAG, "setup() called - START");
+    
     heatpump_ = new comfortzone_heatpump(new EspHomeRS485Interface(this, re_de_pin_));
 
     //esp_log_level_set("*", ESP_LOG_DEBUG);
@@ -441,7 +443,6 @@ namespace esphome::comfortzone
 #endif
 
 #ifdef USE_API
-    // Services exposed to Home Assistant are declared here
     register_service(&ComfortzoneComponent::set_sensor_offset, "set_sensor_offset",
                      {"sensor_num", "offset"});
     register_service(&ComfortzoneComponent::override_indoor_temperature, "override_indoor_temperature",
@@ -452,13 +453,17 @@ namespace esphome::comfortzone
                      {});
     register_service(&ComfortzoneComponent::disable_fireplace_mode, "disable_fireplace_mode",
                      {});
+    ESP_LOGI(TAG, "Services registered");
 #endif
 
+    ESP_LOGI(TAG, "Calling heatpump_->begin()");
     heatpump_->begin();
+    ESP_LOGI(TAG, "setup() called - END");
   }
 
   void ComfortzoneComponent::loop()
   {
+    ESP_LOGD(TAG, "loop() called");
     heatpump_->process();
 
 #if defined(USE_BINARY_SENSOR) && defined(USE_TEXT_SENSOR) && defined(USE_SENSOR)
