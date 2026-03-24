@@ -245,7 +245,7 @@ namespace esphome::comfortzone
   }
 #endif
 
-  float ComfortzoneComponent::get_setup_priority() const { return esphome::setup_priority::DATA; }
+  float ComfortzoneComponent::get_setup_priority() const { return esphome::setup_priority::HARDWARE; }
 
   void ComfortzoneComponent::set_te3_offset_global(globals::RestoringGlobalsComponent<float> *te3_offset)
   {
