@@ -31,7 +31,7 @@ public:
     }
 
     void flush() {
-        return uart_device_->flush();
+        uart_device_->flush();
     }
 
     void enable_receiver_mode() {

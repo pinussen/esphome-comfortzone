@@ -4,6 +4,10 @@ esphome:
       - "-O3"
       - "-DHP_PROTOCOL=${comfortzone_protocol_version}"
       - "-DUSE_API_USER_DEFINED_ACTIONS"
+  esp32:
+    # Disable brownout detector to prevent repeated reboots on marginal power
+    sdkconfig_options:
+      CONFIG_ESP_BROWNOUT_DET: "n"
 
 external_components:
   - source:
