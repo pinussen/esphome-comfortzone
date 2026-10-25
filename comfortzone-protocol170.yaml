@@ -48,3 +48,19 @@ button:
   - platform: comfortzone
     name: "Stop extra hot water"
     enable: false
+  - platform: comfortzone
+    name: "Start fireplace mode"
+    action: fireplace
+    enable: true
+    icon: mdi:fireplace
+  - platform: comfortzone
+    name: "Stop fireplace mode"
+    action: fireplace
+    enable: false
+    icon: mdi:fireplace-off
+  - platform: comfortzone
+    name: "Synchronize pump time"
+    action: sync_clock
+    time_id: sntp_time
+    icon: mdi:clock-check-outline
+    entity_category: config

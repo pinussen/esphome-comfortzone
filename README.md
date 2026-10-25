@@ -25,7 +25,8 @@ register schema, generic decoding/writing and systematic capture analysis.
 - Actual compressor frequency uses panel-checked register `01:02e9`; the old
   `01:02d5` could retain a heating request during hot water production or a stop.
 - Optional `comfortzone-protocol170.yaml`: ventilation Low/Normal/High, heating curve,
-  start/stop extra-hot-water buttons, eleven additional sensors, pump clock and write result.
+  start/stop extra-hot-water and fireplace buttons, on-demand clock synchronization,
+  eleven additional sensors, pump clock and write result.
 - A single asynchronous write at a time: up to 15 seconds waiting for a safe bus gap,
   then 200 ms for acknowledgement. Values are not confirmed merely because a request
   was queued. No automatic resend after a missing acknowledgement.
@@ -34,12 +35,43 @@ register schema, generic decoding/writing and systematic capture analysis.
 The user confirmed that the change from 32 to 29.1 °C was made deliberately in
 Home Assistant. The later 29.1 °C readbacks therefore confirm that HA control
 worked; they are not evidence of the pump reverting the setting.
-Protocol-170 mode/defrost/priority bits and split heating/hot-water CoP remain
-unverified; their presence in a legacy YAML does not imply working readings.
-The two split input-power sensors and their CoP therefore report unknown (`nan`)
-until the required operating mode is known. Their daily energy totals cannot
-provide a reliable split either. Repeated unknown derived values are suppressed;
-finite power readings retain their updates for energy integration.
+Observed normal heating/hot-water profiles now provide mode, allocated input
+power and CoP when paired with fresh, complete measurements. Unknown transitions,
+defrost and additional-heater allocation remain unresolved. Missing or stale
+measurements stay unavailable; per-use daily totals exclude those intervals.
+See [PROTOKOLL-170.md](PROTOKOLL-170.md) for evidence and coverage limitations.
+
+## Home Assistant controls (protocol 170)
+
+Include `comfortzone-protocol170.yaml` alongside the main package to expose:
+
+| Control | HA entity | Notes |
+| --- | --- | --- |
+| Heating and hot-water target | Two climate entities in the main package | Pump-confirmed writes |
+| Ventilation mode | Select: Low / Normal / High | Existing fan command |
+| Heating curve | Number, 1–10 | Readback updates the value |
+| Extra hot water | Start / Stop buttons | No verified persistent boost-state readback |
+| Fireplace mode | Start / Stop buttons | Same asynchronous commands as the existing API actions; active-state readback is not mapped |
+| Pump time | Synchronize pump time button | Uses `sntp_time` and its configured local timezone; verifies a later full clock reply |
+
+Time synchronization is explicit, never periodic or automatic at boot. It writes
+hour/minute only, with approximately one-minute precision; seconds are not mapped.
+It requires a synchronized ESPHome time source, a recent pump clock reading and
+a matching calendar date. Set a wrong date on the pump first. Automatic daylight
+saving is not changed. The operation stops on failure without resending an
+ambiguous write. `Last pump write result` reports progress and readback confirmation.
+
+Live validation on 2026-10-25 confirmed installation and all five buttons in the
+device API. Clock synchronization remains experimental: three attempts found no
+safe bus gap and sent nothing, including one attempt without UDP capture. The
+pump was still about four minutes fast. Hour/minute writes therefore have host
+test coverage but no successful live write/readback confirmation yet. Fireplace
+activation was not exercised during this deployment.
+
+The library also contains older-version methods for date, display brightness,
+automatic daylight saving and sensor calibration. Their write registers are not
+mapped for 170, so they are not advertised as functioning HA controls. Diagnostic
+bus-test API actions are not pump settings and are not added as everyday buttons.
 
 ## Configuration
 

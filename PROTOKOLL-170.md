@@ -470,3 +470,68 @@ hantering av API:s missing_state: 63 samstämmiga husvärmeprov av 85,
 och båda produktionsflaggorna ogiltiga vid okänt läge. Noll CRC-fel under
 kontrollen. Senaste uptime var 253 sekunder. Även bygg-, OTA- och hosttestloggar
 finns i detta arkiv.
+
+## HA-knappar och klocksynkning
+
+`comfortzone-protocol170.yaml` exponerar nu Start/Stop fireplace mode samt
+Synchronize pump time. Befintlig knappkonfiguration med enbart `enable` betyder
+fortfarande extra varmvatten. `action: fireplace` väljer eldstadsläge och
+`action: sync_clock` kräver `time_id` utan `enable`. Temperaturer, fläktläge,
+värmekurva och extra varmvatten hade redan sina reglage.
+
+Timme och minut kan skrivas som en byte till 01:0004 respektive 01:0005.
+Läsadresserna är belagda i 170-fångsterna och motsvarar äldre versioners
+skrivmappning. Biblioteket använder den asynkrona kön och kräver ACK med samma
+värde. ACK ändrar inte klockcachen. En separat räknare/tidsstämpel avancerar
+bara vid ett nytt, kalendergiltigt komplett klocksvar.
+
+Synkningen kräver giltig lokal ESPHome-tid, pumpklocka högst 30 sekunder gammal
+och samma datum. Vid behov skrivs timmen först; minuten hämtas på nytt inför
+nästa skrivning. Minutskrivning väntar om referenssekunden är 40–59 för att
+undvika minutskifte under köväntan. Varje steg väntar på ACK och därefter ny
+oberoende återläsning. Fel avbryter hela följden; inga automatiska omsändningar.
+Läst tid ska avvika mindre än 60 sekunder från referensen för att synkningen
+ska rapporteras klar. Hela operationen är begränsad till 90 sekunder och
+återläsningsväntan till 20 sekunder per skrivning. Timskifte under förloppet
+kan ge ett uttryckligt fel som kräver ett nytt knapptryck.
+
+Inga sekund-, datum- eller sommartidsskrivningar läggs till, och ingen
+återkommande automatisk synkning aktiveras. Övriga gamla setters för displayljus
+och sensorjustering saknar fortfarande 170-mappning och har inte fått
+vilseledande reglage i HA. Eldstadsknapparna saknar verifierad aktiv-status;
+de ger därför inte en optimistisk on/off-switch.
+
+Hosttester täcker skrivbytes, gränser, ACK utan förfalskad återläsning, ogiltiga
+klocksvar, osynkad tidskälla, fel datum, gamla svar, ACK-fel, minutskifte,
+tidsgränser och millis-varvning. 20 Python-tester täcker även gamla och nya
+knappkonfigurationer. Full firmware och climate-only bygger med ESPHome
+2026.10.0 utan kompilatorvarningar. Återspelning av 1 675 ramar och
+ASan/UBSan-kontroller för protokoll 160/180/221 passerar.
+
+### Installationskontroll 2026-10-25
+
+OTA av bygget 20:13:51 +0100 med bibliotek `ce81201b852d` lyckades på
+192.168.3.179 / 08:B6:1F:38:5A:C0. API listar samtliga fem knappar:
+start/stopp extra varmvatten, start/stopp eldstadsläge och klocksynkning.
+Godkänd uppstart och ökande ramräknare med noll CRC-fel observerades.
+Eldstadsläget aktiverades inte under kontrollen.
+
+Klocksynkningen är ännu **inte verifierad mot pumpen**. Tre explicita försök
+avbröts efter 15 sekunder med `No safe bus gap; nothing sent`, även utan
+UDP-fångst. Inga klockkommandon skickades och pumpen ligger fortfarande cirka
+247 sekunder före referenstiden. Skrivmappningen är därmed fortsatt en kandidat
+baserad på läsadresser och äldre protokoll, inte livebekräftad för 170.
+
+En separat passiv UART-fångst på 25 sekunder innehöll 26 482 mottagna bytes,
+varav 19 919 nollbytes, och inga rapporterade tappade traceposter. Många
+nollbytes mellan kompletta ramar samt utebliven fysisk tomgång blockerar
+skrivvillkoren. Detta fastställer inte om orsaken är adapter, signalnivåer,
+störningar eller annan aktivitet på bussen; skrivvillkoren har inte lättats.
+
+Fångster ligger i `/home/bjwl/comfortzone-controls-release-20261025-201649/`,
+`...-202014/` och `...-202106/`. Slutarkivet
+`/home/bjwl/comfortzone-controls-release-20261025-202145/` innehåller firmware,
+hash, bygg-/test-/OTA-loggar och `verification.json` med explicit misslyckad
+klockverifiering. Nästa hårdvarusteg är att undersöka RX-signalen under de
+synbara busspauserna och därefter verifiera ett minutkommando med ACK och ny
+oberoende klockavläsning.

@@ -573,6 +573,7 @@ namespace esphome::comfortzone
     if (!direction_active_ && probe_phase_ == 0) {
       heatpump_->poll_write();
       finish_write();
+      poll_clock_sync_();
     }
 
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
@@ -959,7 +960,8 @@ namespace esphome::comfortzone
 
   bool ComfortzoneComponent::request_write(comfortzone_heatpump::WriteKind kind, float value, uint16_t sensor)
   {
-    if (!heatpump_ || pending_write_ || direction_active_ || probe_phase_) {
+    if (!heatpump_ || pending_write_ || direction_active_ || probe_phase_ ||
+        (clock_sync_.active() && !issuing_clock_write_)) {
       ESP_LOGW(TAG, "Write rejected: component unavailable, direction test active or another write is pending");
       return false;
     }
@@ -985,6 +987,11 @@ namespace esphome::comfortzone
   {
     if (!pending_write_ || heatpump_->write_busy()) return;
     pending_write_ = false;
+#if HP_PROTOCOL == HP_PROTOCOL_1_7 && defined(USE_TIME)
+    if (clock_sync_.active())
+      clock_sync_.acknowledged(heatpump_->write_result() == comfortzone_heatpump::WriteResult::SUCCESS,
+                              heatpump_->clock_read_sequence(), esphome::millis());
+#endif
 #ifdef USE_TEXT_SENSOR
     if (last_write_result_) last_write_result_->publish_state(heatpump_->last_message);
 #endif
@@ -1009,6 +1016,54 @@ namespace esphome::comfortzone
       sensors_te3_indoor_temp_offset_->publish_state(pending_write_value_);
       last_indoor_temperature_override_ = esphome::millis();
       has_indoor_override_ = true;
+    }
+#endif
+  }
+
+  void ComfortzoneComponent::report_clock_sync_(const char *message) {
+    ESP_LOGI(TAG, "%s", message);
+#ifdef USE_TEXT_SENSOR
+    if (last_write_result_) last_write_result_->publish_state(message);
+#endif
+  }
+
+  void ComfortzoneComponent::start_clock_sync() {
+#if HP_PROTOCOL == HP_PROTOCOL_1_7 && defined(USE_TIME)
+    if (!heatpump_ || pending_write_ || direction_active_ || probe_phase_ || clock_sync_.active()) {
+      report_clock_sync_("Clock sync rejected: another operation is active"); return;
+    }
+    if (!time_source_ || !time_source_->now().is_valid()) {
+      report_clock_sync_("Clock sync rejected: time source is not synchronized"); return;
+    }
+    clock_sync_.start(esphome::millis());
+    report_clock_sync_("Synchronizing pump time");
+#else
+    report_clock_sync_("Clock sync requires protocol 170 and a time source");
+#endif
+  }
+
+  void ComfortzoneComponent::poll_clock_sync_() {
+#if HP_PROTOCOL == HP_PROTOCOL_1_7 && defined(USE_TIME)
+    if (!clock_sync_.active() || pending_write_) return;
+    const auto now = esphome::millis();
+    const auto rtc = time_source_->now();
+    const auto &s = heatpump_->comfortzone_status;
+    ClockSync::Clock reference{rtc.is_valid(), rtc.year, rtc.month, rtc.day_of_month,
+                              rtc.hour, rtc.minute, rtc.second, 0};
+    ClockSync::Clock pump{heatpump_->clock_read_sequence()!=0 && now-heatpump_->clock_read_time()<=30000,
+                         s.year, s.month, s.day, s.hour, s.minute, s.second, heatpump_->clock_read_sequence()};
+    const auto action = clock_sync_.poll(pump, reference, now);
+    if (action == ClockSync::Action::DONE) {
+      report_clock_sync_("Pump time synchronized; readback verified (minute precision)");
+    } else if (action == ClockSync::Action::FAILED) {
+      report_clock_sync_(clock_sync_.error());
+    } else if (action == ClockSync::Action::HOUR || action == ClockSync::Action::MINUTE) {
+      issuing_clock_write_=true;
+      const bool accepted=request_write(action == ClockSync::Action::HOUR ?
+          comfortzone_heatpump::WriteKind::HOUR : comfortzone_heatpump::WriteKind::MINUTE,
+          clock_sync_.value());
+      issuing_clock_write_=false;
+      if (!accepted) clock_sync_.acknowledged(false, heatpump_->clock_read_sequence(), now);
     }
 #endif
   }

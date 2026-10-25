@@ -1,5 +1,10 @@
 #pragma once
+#include "esphome/core/defines.h"
 #include "comfortzone_energy.h"
+#include "comfortzone_clock_sync.h"
+#ifdef USE_TIME
+#include "esphome/components/time/real_time_clock.h"
+#endif
 
 #include <cmath>
 #include <vector>
@@ -146,6 +151,10 @@ class EspHomeRS485Interface;
     void set_water_heater_climate(ComfortzoneWaterHeaterClimate *water_heater_climate);
 #endif
     comfortzone_heatpump *get_heatpump() const;
+    void start_clock_sync();
+#ifdef USE_TIME
+    void set_time_source(time::RealTimeClock *source) { time_source_ = source; }
+#endif
     bool request_write(comfortzone_heatpump::WriteKind kind, float value, uint16_t sensor = 0);
 
     void dump_config() override;
@@ -174,6 +183,13 @@ class EspHomeRS485Interface;
     ComfortzoneCurveNumber *curve_number_{nullptr};
 #endif
     void finish_write();
+    void poll_clock_sync_();
+    void report_clock_sync_(const char *message);
+    ClockSync clock_sync_;
+    bool issuing_clock_write_{false};
+#ifdef USE_TIME
+    time::RealTimeClock *time_source_{nullptr};
+#endif
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
     void publish_operating_170_(uint32_t now);
     uint32_t last_operating_update_{0};

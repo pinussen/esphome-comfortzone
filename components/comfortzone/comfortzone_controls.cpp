@@ -14,7 +14,10 @@ void ComfortzoneCurveNumber::control(float value) {
 #endif
 #ifdef USE_BUTTON
 void ComfortzoneHotWaterButton::press_action() {
-  if (parent_) parent_->request_write(comfortzone_heatpump::WriteKind::EXTRA_HOT_WATER, enable_ ? 1 : 0);
+  if (!parent_) return;
+  if (action_ == 2) { parent_->start_clock_sync(); return; }
+  parent_->request_write(action_ == 1 ? comfortzone_heatpump::WriteKind::FIREPLACE :
+                         comfortzone_heatpump::WriteKind::EXTRA_HOT_WATER, enable_ ? 1 : 0);
 }
 #endif
 }

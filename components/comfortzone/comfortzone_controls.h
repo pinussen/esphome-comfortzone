@@ -34,10 +34,12 @@ class ComfortzoneHotWaterButton : public button::Button {
  public:
   void set_parent(ComfortzoneComponent *parent) { parent_ = parent; }
   void set_enable(bool enable) { enable_ = enable; }
+  void set_action(uint8_t action) { action_ = action; }
  protected:
   void press_action() override;
   ComfortzoneComponent *parent_{nullptr};
   bool enable_{false};
+  uint8_t action_{0}; // 0 extra water, 1 fireplace, 2 clock sync
 };
 #endif
 }
