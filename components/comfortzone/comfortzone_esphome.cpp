@@ -1,6 +1,7 @@
 #include "comfortzone_esphome.h"
 
 #include <cmath>
+#include <cinttypes>
 #include <cstring>
 #include <vector>
 #include "comfortzone_heatpump.h"
@@ -20,6 +21,15 @@ namespace esphome::comfortzone
   static const char *TAG = "comfortzone";
 
 #ifdef USE_SENSOR
+  static void publish_derived_state(sensor::Sensor *sensor, float value)
+  {
+    if (!sensor) return;
+    // Publish unknown once, and again when a valid reading becomes unknown.
+    // Keep repeated finite readings: energy integration needs their timestamps.
+    if (std::isnan(value) && sensor->has_state() && std::isnan(sensor->get_raw_state())) return;
+    sensor->publish_state(value);
+  }
+
   static void on_temperature_sensor_update(int16_t value, void *context)
   {
     if (!context)
@@ -346,7 +356,7 @@ namespace esphome::comfortzone
 
     //esp_log_level_set("*", ESP_LOG_DEBUG);
     ESP_LOGI("Main", "Logging is working!");
-    ESP_LOGI(TAG, "Free heap: %d", esp_get_free_heap_size());
+    ESP_LOGI(TAG, "Free heap: %" PRIu32, esp_get_free_heap_size());
     auto &status = heatpump_->comfortzone_status;
     status.sensors_te3_indoor_temp.subscribe([](int16_t raw, void *context) {
       auto *self = static_cast<ComfortzoneComponent *>(context);
@@ -543,7 +553,8 @@ namespace esphome::comfortzone
     const uint32_t now = esphome::millis();
     if (now - last_bus_report_ >= 30000) {
       last_bus_report_ = now;
-      ESP_LOGI(TAG, "RS485: frames=%u CRC errors=%u unknown registers=%u", received_frames_, corrupted_frames_, unknown_frames_);
+      ESP_LOGI(TAG, "RS485: frames=%" PRIu32 " CRC errors=%" PRIu32 " unknown registers=%" PRIu32,
+               received_frames_, corrupted_frames_, unknown_frames_);
     }
 #ifdef USE_TEXT_SENSOR
     auto &clock = heatpump_->comfortzone_status;
@@ -580,10 +591,10 @@ namespace esphome::comfortzone
         else if (s.mode == CZMD_IDLE && input == 0) { heating = water = 0; }
         // Unknown / simultaneous modes cannot safely partition energy by use.
       }
-      if (heatpump_current_compressor_heating_input_power_) heatpump_current_compressor_heating_input_power_->publish_state(heating);
-      if (heatpump_current_compressor_water_input_power_) heatpump_current_compressor_water_input_power_->publish_state(water);
-      if (heating_cop_) heating_cop_->publish_state(heating_cop);
-      if (water_cop_) water_cop_->publish_state(water_cop);
+      publish_derived_state(heatpump_current_compressor_heating_input_power_, heating);
+      publish_derived_state(heatpump_current_compressor_water_input_power_, water);
+      publish_derived_state(heating_cop_, heating_cop);
+      publish_derived_state(water_cop_, water_cop);
     }
 #endif
 

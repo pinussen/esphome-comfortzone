@@ -14,6 +14,9 @@ new entities and remaining uncertainties. [PROTOKOLL-170.md](PROTOKOLL-170.md)
 documents the captured register evidence. [DIAGNOSTIK.md](DIAGNOSTIK.md) records
 hardware diagnosis, deployment and live write tests.
 
+[PROTOKOLL-PLAN.md](PROTOKOLL-PLAN.md) sets out the staged migration to a shared
+register schema, generic decoding/writing and systematic capture analysis.
+
 ## What is supported
 
 - Heating and hot-water climate entities, temperatures, powers and cumulative counters.
@@ -31,6 +34,10 @@ Home Assistant. The later 29.1 °C readbacks therefore confirm that HA control
 worked; they are not evidence of the pump reverting the setting.
 Protocol-170 mode/defrost/priority bits and split heating/hot-water CoP remain
 unverified; their presence in a legacy YAML does not imply working readings.
+The two split input-power sensors and their CoP therefore report unknown (`nan`)
+until the required operating mode is known. Their daily energy totals cannot
+provide a reliable split either. Repeated unknown derived values are suppressed;
+finite power readings retain their updates for energy integration.
 
 ## Configuration
 

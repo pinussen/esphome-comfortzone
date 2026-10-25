@@ -1,13 +1,13 @@
 {
   "repository": "https://github.com/pinussen/comfortzone_heatpump",
-  "commit": "42fc534477553c63f765521fe2cc57d9d0762589",
+  "commit": "a84694fe105f3050ac4279d21a7e936410efd949",
   "sha256": {
     "LICENSE": "589ed823e9a84c56feb95ac58e7cf384626b9cbf4fda2a907bc36e103de1bad2",
     "README.txt": "1c16d8d349bbbf801979650eb649b9e8fc3e5e4e2c2d7675d5366098966d1055",
     "comfortzone_config.h": "54527fd2792f9e8528c093f73efe76178787e69eb5cf6717c6c3afb6b7a7c34d",
     "comfortzone_crafting.cpp": "b284d0b7e90316846954d490ab227c938938e0d64a2e68d78b621c6e0a85c575",
     "comfortzone_crafting.h": "2950710844746ec73101f8be5fab728fe81d3828124ea0a16ce2b3053d36db2a",
-    "comfortzone_decoder.cpp": "a0abd245705b523e1e59c2a679fb0257375ec1c491dda9c6995e71b2cf6ed7d9",
+    "comfortzone_decoder.cpp": "a776e6500805a0abe5770fc62a857eb28f63cb91f5cac62a5d08ffc93efcfd86",
     "comfortzone_decoder.h": "d88640effd6d8e77e5c27e0ccb4adf74cf68d188380c3478511998f065fdc90b",
     "comfortzone_decoder_basic.cpp": "d22e6bd5cfc7e5f8082ffa5bd951e06e1330ced11e967dc7a04f775152e8ec21",
     "comfortzone_decoder_status.cpp": "00db15a6b6b603ff3ae89e85082da31a54b2ddd8b3ef468d5022333c131fb236",
