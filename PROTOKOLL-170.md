@@ -200,3 +200,61 @@ Värmeregistret `00:02a6` återlästes den 25 oktober som 29,1 °C efter tidigar
 32,0 °C. Användaren bekräftade därefter att sänkningen gjordes avsiktligt från HA.
 Detta är alltså en lyckad återläsning av HA-ändringen, inte belägg för en
 spontan ändring eller återställning i pumpen.
+
+## Drift- och frekvenskandidater, 2026-10-25 kväll
+
+Ny passiv fångst 18:51–18:54 lokal tid från ersättningskortet, med oförändrad
+firmware byggd 15:36:20 och bibliotek `42fc53447755`:
+`/home/bjwl/comfortzone-frequency-mode-20261025-185102/`.
+564 fullständiga CRC-giltiga ramar mottogs under tre minuter. UDP-fångsten kan
+ändå ha luckor. Ingen pumpinställning eller firmware ändrades.
+
+Användaren rapporterade stabil kompressorfrekvens **28,3 Hz** under fångsten;
+exakt avläsningstid och driftläge var inte kända. Råvärdet 283 finns bland annat
+18:52:35 och 18:52:49. Flera närliggande fält följs åt under stabil drift, så
+denna kontroll skiljer inte faktiskt varvtal från begärt varvtal.
+
+Tabellen visar råa heltal i bank 01. Frekvenshypoteserna använder skalan /10.
+Intervallen är från respektive fångst; kolumnerna ska inte tolkas som samtidiga
+värden från ett gemensamt ögonblick.
+
+| Fångst | Statusbyte 0018 | 02d5 | 02d7 | 02d9 | 02e9 |
+| --- | --- | --- | --- | --- | --- |
+| `comfortzone-debug-2026-10-24-target.pcap` | 0x2A | 346–349 | 0 | 346–349 | 309 |
+| `comfortzone-passive-decode-2026-10-24/capture.pcap` | 0x2C | 0 | 300 | 300 | 300 |
+| `comfortzone-review-live-2026-10-25/capture.pcap` | 0x08 | 0 | 0 | 0 | 0 |
+| Ny kvällsfångst | 0x2A | 282–288 | 0 | 282–288 | 282–288 |
+
+Det befintliga frekvensfältet `01:02d5` är alltså **inte alltid noll**. En hypotes
+är att det hör till värmedrift, medan `01:02d7` hör till varmvatten och `01:02d9`
+är en gemensam frekvens efter ytterligare villkor. `01:02e9` är en kandidat till
+faktisk frekvens, eftersom det avviker från 02d5/02d9 i målfångsten men följer
+dem i den stabila kvällsfångsten. Dessa benämningar är ännu inte verifierade.
+
+Ett viktigt motexempel finns i `comfortzone-debug-2.pcap`: i 13 av 19 avduplicerade
+svar är `02d7 = 300` medan `02d9 = 0`. Den gemensamma frekvensen kan därför
+**inte generellt ersättas med max(02d5, 02d7)**. Råfångster behövs också vid
+start, stopp och avfrostning, inte bara under stabil kompressordrift.
+
+Statusbytet `01:0018` ligger på samma byteadress som `unknown3[9]` i den äldre
+1.80-strukturen. Där tolkas bitarna 1–2 som driftval och 4–5 som kompressorstatus.
+Den tolkningen skulle ge värme/körning för 0x2A, varmvatten/körning för 0x2C
+och vila/stopp för 0x08. Detta passar observerade effekt- och temperaturförlopp,
+men är en **hypotes för 170**, inte skäl att återanvända hela 1.80-avkodaren.
+
+`01:02cb` varierar också i ett numeriskt rimligt frekvensintervall, men följer
+temperaturnivåer och har den ärvda benämningen kondenseringstemperatur. Att ett
+tal ser ut som Hz räcker alltså inte för att flytta frekvensavkodningen dit.
+
+Nästa kontroll: panelens driftläge och frekvens under en naturlig övergång
+mellan husvärme och varmvatten, med tidsmatchad fångst av 0018 och området
+02d5–02eb. Dokumentera även effekt och faktisk/förväntad frekvens vid övergången.
+Enligt [EX50-manualen, sida 5](https://www.vvsbutiken.nu/dokument/cz06025_manual__ex35_ex50_ex65_b.pdf#page=5)
+visas driftläge, husvärme och varmvatten under Driftinformation.
+
+Analysen kan upprepas med `analyze_fields.py` i fångstkatalogen; `comparison.json`
+innehåller fångsthashar, separata enheter, råramar, tidsstämplar, intervall och
+kontroller inom samma ram. Snabba identiska efterföljande lässvar (<100 ms)
+räknas separat. Ett litet urval av 14 CRC-kontrollerade råramar med ursprung
+finns i [tests/v170_operating_candidates.json](tests/v170_operating_candidates.json).
+Ingen ny registerbetydelse har aktiverats i firmware på grundval av dessa kandidater.

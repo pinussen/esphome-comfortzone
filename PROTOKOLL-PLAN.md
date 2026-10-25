@@ -3,6 +3,13 @@
 Planerad 2026-10-25. Detta dokument beskriver kommande arbete; det är inte
 en deklaration om att hela protokollet redan är avkodat.
 
+Påbörjat 2026-10-25 kväll: jämfört sju fångster, tagit en ny passiv treminutersfångst
+och sparat 14 råfixtures. Första resultatet är en möjlig uppdelning mellan
+värmefrekvens, varmvattenfrekvens och faktisk frekvens, samt ett konkret
+motexempel mot att bara ta maxvärdet. Se [PROTOKOLL-170.md](PROTOKOLL-170.md).
+Nästa belägg är panelens driftläge vid en övergång; registerkartan och
+protokollmotorns migrering är ännu inte implementerade.
+
 ## Mål och utgångsläge
 
 Nya vanliga värden ska kunna läggas till som registerdefinitioner, utan en
