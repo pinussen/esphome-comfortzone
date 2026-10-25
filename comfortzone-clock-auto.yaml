@@ -1,0 +1,24 @@
+# Include alongside comfortzone-package.yaml and comfortzone-protocol170.yaml.
+# Uses the existing SNTP timezone and verified hour/minute write sequence.
+switch:
+  - platform: template
+    name: "Automatic pump time sync"
+    id: comfortzone_auto_clock_sync
+    icon: mdi:clock-check-outline
+    entity_category: config
+    optimistic: true
+    restore_mode: RESTORE_DEFAULT_ON
+
+time:
+  - id: !extend sntp_time
+    on_time:
+      - hours: 4
+        minutes: 10
+        seconds: 0
+        then:
+          - if:
+              condition:
+                switch.is_on: comfortzone_auto_clock_sync
+              then:
+                - logger.log: "Starting scheduled pump time synchronization"
+                - button.press: comfortzone_sync_clock

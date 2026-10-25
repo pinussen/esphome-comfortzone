@@ -54,12 +54,28 @@ Include `comfortzone-protocol170.yaml` alongside the main package to expose:
 | Fireplace mode | Start / Stop buttons | Same asynchronous commands as the existing API actions; active-state readback is not mapped |
 | Pump time | Synchronize pump time button | Uses `sntp_time` and its configured local timezone; verifies a later full clock reply |
 
-Time synchronization is explicit, never periodic or automatic at boot. It writes
+Time synchronization is manual by default. It writes
 hour/minute only, with approximately one-minute precision; seconds are not mapped.
 It requires a synchronized ESPHome time source, a recent pump clock reading and
 a matching calendar date. Set a wrong date on the pump first. Automatic daylight
 saving is not changed. The operation stops on failure without resending an
 ambiguous write. `Last pump write result` reports progress and readback confirmation.
+
+For daily synchronization, also include `comfortzone-clock-auto.yaml`. This adds
+an **Automatic pump time sync** switch to HA (enabled initially, with its state
+saved across restarts). At 04:10 in the configured SNTP timezone, the ESP32 invokes
+the same verified sequence as the manual button, independently of HA. The time
+is after the daylight-saving transition in Europe/Stockholm. There is no immediate
+boot sync or catch-up after a missed schedule; a failed or busy attempt is reported
+in `Last pump write result` and the next automatic attempt is the following day.
+Date and seconds remain unchanged. The HA example includes this optional package.
+Scheduling uses ESPHome's [on_time automation](https://esphome.io/components/time/#on_time-trigger).
+
+Add this entry under `packages:` in an existing HA Device Builder YAML:
+
+```yaml
+  clock_auto: github://pinussen/esphome-comfortzone/comfortzone-clock-auto.yaml@feature/ex50-register-controls
+```
 
 Live validation on 2026-10-25 confirmed installation and all five buttons in the
 device API. Hour and minute writes were both acknowledged and confirmed by an

@@ -60,6 +60,7 @@ button:
     icon: mdi:fireplace-off
   - platform: comfortzone
     name: "Synchronize pump time"
+    id: comfortzone_sync_clock
     action: sync_clock
     time_id: sntp_time
     icon: mdi:clock-check-outline

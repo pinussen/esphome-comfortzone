@@ -9,6 +9,7 @@ substitutions:
 packages:
   comfortzone_package: github://pinussen/esphome-comfortzone/comfortzone-package.yaml@feature/ex50-register-controls
   protocol170: github://pinussen/esphome-comfortzone/comfortzone-protocol170.yaml@feature/ex50-register-controls
+  clock_auto: github://pinussen/esphome-comfortzone/comfortzone-clock-auto.yaml@feature/ex50-register-controls
 
 esphome:
   name: comfortzone
@@ -54,3 +55,4 @@ uart:
 
 comfortzone:
   detect_idle_break: true
+  zero_byte_idle: true

@@ -3,6 +3,7 @@
 packages:
   recovery: !include comfortzone-recovery.yaml
   protocol170: !include comfortzone-protocol170.yaml
+  clock_auto: !include comfortzone-clock-auto.yaml
 substitutions:
   tx_pin: "26"
 comfortzone:
