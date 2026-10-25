@@ -5,6 +5,8 @@ packages:
   protocol170: !include comfortzone-protocol170.yaml
 substitutions:
   tx_pin: "26"
+comfortzone:
+  zero_byte_idle: true
 esphome:
   build_path: build/comfortzone-tx26-test
   comment: "TX=GPIO26, RX=GPIO16, DE=GPIO21; inner header row"

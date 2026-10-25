@@ -16,6 +16,15 @@ void comfortzone_heatpump::begin() {
 	rs485->begin();
 }
 
+#if HP_PROTOCOL == HP_PROTOCOL_1_7
+uint32_t comfortzone_heatpump::clock_read_age() const {
+	return static_cast<uint32_t>(millis()) - clock_read_time_;
+}
+ComfortzoneOperating170::Result comfortzone_heatpump::operating_170() const {
+	return operating_170_.result(static_cast<uint32_t>(millis()));
+}
+#endif
+
 comfortzone_heatpump::PROCESSED_FRAME_TYPE comfortzone_heatpump::process()
 {
 	PROCESSED_FRAME_TYPE pft;
@@ -34,6 +43,10 @@ comfortzone_heatpump::PROCESSED_FRAME_TYPE comfortzone_heatpump::process()
 	{
 		const int received = rs485->read_byte();
 		if (received < 0) break;
+		if (received != 0) {
+			last_nonzero_rx_time_ = static_cast<uint32_t>(millis());
+			if (received != 0x40) idle_tail_since_reply_ = false;
+		}
 		cz_buf[cz_size++] = static_cast<byte>(received);
 		last_rx_byte_time_ = static_cast<uint32_t>(millis());
 
@@ -81,10 +94,14 @@ comfortzone_heatpump::PROCESSED_FRAME_TYPE comfortzone_heatpump::process()
 	}
 
 	// Some adapters hold RX low between frames. ESP32 can report zero bytes
-	// during this break. Discard only a zero-only tail after a CRC-valid reply,
-	// and only when physical RX edge detection proves 100 ms without transitions.
+	// during this break. Discard only a zero-only tail after a CRC-valid reply.
+	// Physical RX detection normally requires 100 ms without transitions.
+	// An explicit zero-byte-idle policy also permits a zero-only suffix after
+	// 40 ms without nonzero bytes. An isolated 0x40 seen in this installation
+	// restarts that timer; all other nonzero bytes revoke the override.
 	// A partial real request, including any nonzero address byte, remains intact.
-	if (cz_size > 0 && bus_reply_seen_ && rs485->idle_break(100)) {
+	const bool assumed_zero_idle = zero_byte_idle_ready_(static_cast<uint32_t>(millis()));
+	if (cz_size > 0 && bus_reply_seen_ && (rs485->idle_break(100) || assumed_zero_idle)) {
 		bool only_zeros = true;
 		for (uint16_t i = 0; i < cz_size; ++i) only_zeros &= cz_buf[i] == 0;
 		if (only_zeros) cz_size = 0;

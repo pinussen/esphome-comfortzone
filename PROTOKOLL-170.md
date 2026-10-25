@@ -556,3 +556,51 @@ aktiv sändare behöver korrekt bias för ett definierat viloläge:
 Vår skrivkö kan alltså blockeras av mottagarbeteende även när inga riktiga
 meddelanden sänds. Nästa test behöver skilja detta från aktiv trafik; enbart
 förekomsten av nollbytes ska inte tolkas som bevis för upptagen buss.
+
+### Valbart antagande om nollbytes som vila
+
+Efter användarens uttryckliga godkännande införs `comfortzone.zero_byte_idle`.
+Standardvärdet är `false`; testbygget `comfortzone-tx26-test.yaml` aktiverar det.
+Ett CRC-giltigt svar från pumpens adress öppnar ett tidsfönster 40–999 ms
+efter svaret. Efter minst 40 ms utan bytes som inte är noll får parserns nollsvans
+tömmas och kommandot skickas när UART-bufferten är tom. Enstaka `0x40`,
+som observerats bland vilonollorna, startar om dessa 40 ms. Alla andra
+bytes som inte är noll återkallar undantaget fram till nästa giltiga
+pumpsvar, även om parsern senare förskjuter bort den byten. Begäranden, felaktiga CRC och svar
+från andra adresser ger inte sändningstillstånd. ACK-kontroll, 15 sekunders
+kögräns och förbudet mot automatisk omsändning är oförändrade.
+
+Detta är ett uttryckligt antagande för installationen och inte ett bevis
+för elektrisk tystnad. Tester täcker kontinuerliga nollor med alternativet
+av/på, 40 ms-gränsen, enstaka 0x40, partiella begäranden, olästa UART-bytes,
+fel avsändare/CRC, för gammalt svar samt tidsräknarens varvning.
+
+Det första provet med enbart nollor nådde inte fram. Med omstartad väntetid
+för `0x40` lyckades ett timkommando: klockan ändrades från 21 till 20 och
+kvittensen var `45726963ae23656fde021777010203040b0801040014d5`.
+Efterföljande, oberoende klocksvar visade timme 20. Fångsten finns i
+`/home/bjwl/comfortzone-zero-idle-release-20261025-205634/` och relevanta
+ramar i `tests/v170_clock_write_fixtures.json`.
+
+Synkningen avbröts då före minutsteget på grund av ett separat tidsbasfel.
+ESPHome 2026.10 använder FreeRTOS tickräknare i `esphome::millis()` vid
+1 kHz, medan bibliotekets `::millis()` använder `esp_timer_get_time()/1000`.
+Olika startpunkter kunde få en ny avläsning att se äldre än 30 sekunder ut
+vid unsigned subtraktion. Biblioteket beräknar nu självt avläsningens ålder
+med `clock_read_age()`. Även driftläges-/effektprov kontrolleras med
+bibliotekets egen tidsbas genom `operating_170()` utan tidsargument.
+Synksekvensens egna tidsgränser fortsätter använda ESPHomes räknare konsekvent.
+
+Slutkontrollen med bygget 21:00:38 +0100 och bibliotek `0cbd23331122`
+lyckades: både timme 21 och minut 3 kvitterades med motsvarande värde,
+och en ny fullständig klockavläsning bekräftade tiden. Uppmätt avvikelse
+efter synkningen var cirka +4,6 sekunder. Det tidigare avbrottet mellan
+tim- och minutsteget hade lämnat klockan nästan en timme fel; detta rättades
+av den fullständiga synkningen. Övriga kontrollerade börvärden var oförändrade.
+Noll CRC-fel observerades under kontrollen och efterföljande 30 sekunder.
+
+Slutarkiv med firmware/hash, kontrollskript, loggar, PCAP och
+`verification.json`: `/home/bjwl/comfortzone-zero-idle-release-20261025-210230/`.
+Infångade tim-/minutkvittensramar och återläsning finns även som testfixturer.
+För att behålla samma nollbytespolicy vid nästa HA-bygge behöver enhetens
+YAML innehålla `comfortzone: {zero_byte_idle: true}` och den uppdaterade komponenten.

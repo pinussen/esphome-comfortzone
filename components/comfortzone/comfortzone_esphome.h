@@ -75,6 +75,7 @@ class EspHomeRS485Interface;
     void set_rx_idle_pin(int pin) { rx_idle_pin_ = pin; }
     void set_tx_monitor_pin(int pin) { tx_monitor_pin_ = pin; }
     void set_controller_address(uint32_t address) { controller_address_ = address; }
+    void set_zero_byte_idle(bool enabled) { zero_byte_idle_ = enabled; }
 
 #ifdef USE_SELECT
     void set_fan_select(ComfortzoneFanSelect *entity) { fan_select_ = entity; entity->set_parent(this); }
@@ -191,7 +192,7 @@ class EspHomeRS485Interface;
     time::RealTimeClock *time_source_{nullptr};
 #endif
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
-    void publish_operating_170_(uint32_t now);
+    void publish_operating_170_();
     uint32_t last_operating_update_{0};
 #endif
     EspHomeRS485Interface *rs485_adapter_{nullptr};
@@ -203,6 +204,7 @@ class EspHomeRS485Interface;
     uint32_t probe_phase_started_{0};
     void poll_read_probe_();
     uint32_t controller_address_{0x45726963};
+    bool zero_byte_idle_{false};
     bool raw_uart_debug_{false};
     bool direction_active_{false};
     bool direction_settled_{false};

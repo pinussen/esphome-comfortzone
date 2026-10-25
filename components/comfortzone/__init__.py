@@ -43,6 +43,7 @@ CONFIG_SCHEMA = cv.Schema(
         cv.GenerateID(CONF_COMFORTZONE_ID): cv.declare_id(ComfortzoneComponent),
         cv.Required(CONF_RE_DE_PIN): pins.gpio_output_pin_schema,
         cv.Optional("detect_idle_break", default=False): cv.boolean,
+        cv.Optional("zero_byte_idle", default=False): cv.boolean,
         cv.Optional("controller_address", default=0x45726963): cv.hex_uint32_t,
         cv.Required(CONF_TE3_OFFSET_GLOBAL_ID): cv.All(
             # Ensure the ID refers to a global variable
@@ -62,6 +63,7 @@ async def to_code(config):
     await cg.register_component(var, config)
     await uart.register_uart_device(var, config)
     cg.add(var.set_controller_address(config["controller_address"]))
+    cg.add(var.set_zero_byte_idle(config["zero_byte_idle"]))
 
     if config["detect_idle_break"]:
         bus = next(b for b in CORE.config["uart"] if b[CONF_ID] == config[CONF_UART_ID])

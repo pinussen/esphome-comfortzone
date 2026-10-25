@@ -62,11 +62,26 @@ saving is not changed. The operation stops on failure without resending an
 ambiguous write. `Last pump write result` reports progress and readback confirmation.
 
 Live validation on 2026-10-25 confirmed installation and all five buttons in the
-device API. Clock synchronization remains experimental: three attempts found no
-safe bus gap and sent nothing, including one attempt without UDP capture. The
-pump was still about four minutes fast. Hour/minute writes therefore have host
-test coverage but no successful live write/readback confirmation yet. Fireplace
-activation was not exercised during this deployment.
+device API. Hour and minute writes were both acknowledged and confirmed by an
+independent clock reply. After correcting idle detection and a timer epoch
+mismatch, synchronization left the pump approximately five seconds ahead.
+Fireplace activation was not exercised during this deployment.
+
+For installations where the receive adapter produces zero bytes between pump
+messages, the experimental `comfortzone: {zero_byte_idle: true}` option treats
+a zero-only suffix after a valid pump reply as idle. It defaults to false and
+requires 40 ms without nonzero bytes. An isolated `0x40` among the observed
+idle zeros restarts that timer; other nonzero bytes revoke the exception
+until the next valid pump reply. Partial messages still block transmission. This explicitly assumes the
+zeros are idle filler; it does not prove the electrical bus is undriven.
+
+The live EX50 test build enables this option. To retain it when building from
+Home Assistant, merge this into the device YAML (with the updated component):
+
+```yaml
+comfortzone:
+  zero_byte_idle: true
+```
 
 The library also contains older-version methods for date, display brightness,
 automatic daylight saving and sensor calibration. Their write registers are not

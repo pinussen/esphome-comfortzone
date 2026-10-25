@@ -353,6 +353,7 @@ namespace esphome::comfortzone
                                       static_cast<byte>(controller_address_ >> 8),
                                       static_cast<byte>(controller_address_)};
     heatpump_->set_controller_addr(controller_address);
+    heatpump_->set_zero_byte_idle(zero_byte_idle_);
 
     //esp_log_level_set("*", ESP_LOG_DEBUG);
     ESP_LOGI("Main", "Logging is working!");
@@ -580,7 +581,7 @@ namespace esphome::comfortzone
     // Also expire derived values during complete bus silence.
     if (now - last_operating_update_ >= 1000) {
       last_operating_update_ = now;
-      publish_operating_170_(now);
+      publish_operating_170_();
     }
 #elif defined(USE_SENSOR)
     // Derive from library state, independently of optional HA sensor entities.
@@ -658,8 +659,8 @@ namespace esphome::comfortzone
   }
 
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
-  void ComfortzoneComponent::publish_operating_170_(uint32_t now) {
-    const auto result = heatpump_->operating_170(now);
+  void ComfortzoneComponent::publish_operating_170_() {
+    const auto result = heatpump_->operating_170();
 #ifdef USE_SENSOR
     publish_derived_state(heatpump_current_compressor_heating_input_power_, result.heating_input);
     publish_derived_state(heatpump_current_compressor_water_input_power_, result.water_input);
@@ -693,6 +694,7 @@ namespace esphome::comfortzone
     ESP_LOGCONFIG(TAG, "Comfortzone initialized, protocol=%d, asynchronous writes", HP_PROTOCOL);
     ESP_LOGCONFIG(TAG, "Library snapshot: %s", CZ_LIBRARY_REVISION);
     ESP_LOGCONFIG(TAG, "Controller address: %08lX", static_cast<unsigned long>(controller_address_));
+    ESP_LOGCONFIG(TAG, "Zero-only tail after pump reply treated as idle: %s", zero_byte_idle_ ? "yes" : "no");
     ESP_LOGCONFIG(TAG, "Physical RX edge detection: %s (GPIO%d)",
                   rs485_adapter_->edge_detection_ready() ? "enabled" : "disabled", rx_idle_pin_);
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
@@ -1050,7 +1052,7 @@ namespace esphome::comfortzone
     const auto &s = heatpump_->comfortzone_status;
     ClockSync::Clock reference{rtc.is_valid(), rtc.year, rtc.month, rtc.day_of_month,
                               rtc.hour, rtc.minute, rtc.second, 0};
-    ClockSync::Clock pump{heatpump_->clock_read_sequence()!=0 && now-heatpump_->clock_read_time()<=30000,
+    ClockSync::Clock pump{heatpump_->clock_read_sequence()!=0 && heatpump_->clock_read_age()<=30000,
                          s.year, s.month, s.day, s.hour, s.minute, s.second, heatpump_->clock_read_sequence()};
     const auto action = clock_sync_.poll(pump, reference, now);
     if (action == ClockSync::Action::DONE) {

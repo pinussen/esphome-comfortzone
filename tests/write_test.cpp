@@ -1,4 +1,5 @@
 #include "host_bus.h"
+#include "zero_idle_test.h"
 #include "comfortzone_decoder.h"
 #include "frequency_fixture.h"
 #include "status_fixture.h"
@@ -10,6 +11,7 @@
 #endif
 
 int main(int argc, char **argv) {
+  test_zero_byte_idle();
   test_operating();
 #ifdef TEST_ESPHOME_PROBE
   test_clock_sync();
@@ -388,16 +390,36 @@ int main(int argc, char **argv) {
       assert(hp.begin_write(kind,20)); ready(hp,bus); test_millis+=40; hp.poll_write();
       assert(bus.sent.size()==23 && bus.sent[11]=='W' && bus.sent[18]==1);
       assert(bus.sent[19]==(kind==Kind::HOUR?4:5) && bus.sent[20]==0 && bus.sent[21]==20);
-      bus.feed(ack(bus)); hp.process(); assert(hp.write_result()==Result::SUCCESS);
+      // Captured hour ACK, 2026-10-25 20:57:35; see v170_clock_write_fixtures.json.
+      const std::vector<byte> hour_ack={0x45,0x72,0x69,0x63,0xae,0x23,0x65,0x6f,0xde,0x2,0x17,0x77,0x1,0x2,0x3,0x4,0xb,0x8,0x1,0x4,0x0,0x14,0xd5};
+      bus.feed(kind==Kind::HOUR ? hour_ack : ack(bus)); hp.process();
+      assert(hp.write_result()==Result::SUCCESS);
       assert(hp.clock_read_sequence()==0 && !hp.comfortzone_status.hour.has_value());
     }
     auto clock=pump_reply(); clock.resize(28); clock[10]=28; clock[18]=1; clock[19]=4; clock[20]=0;
     const byte bytes[]={20,20,8,25,10,26}; std::memcpy(clock.data()+21,bytes,6); crc(clock);
     test_millis+=100; bus.feed(clock); hp.process();
     assert(hp.clock_read_sequence()==1 && hp.clock_read_time()==test_millis);
+    assert(hp.clock_read_age()==0); // internal epoch; no ESPHome tick subtraction
+    test_millis+=30001; assert(hp.clock_read_age()==30001);
     assert(hp.comfortzone_status.hour==20 && hp.comfortzone_status.minute==20);
-    clock[24]=32; crc(clock); bus.feed(clock); hp.process(); assert(hp.clock_read_sequence()==1);
-    clock[24]=25; clock.back()^=1; bus.feed(clock); hp.process(); assert(hp.clock_read_sequence()==1);
+    test_millis=0xfffffff0U; bus.feed(clock); hp.process();
+    const auto sequence=hp.clock_read_sequence();
+    test_millis+=40; assert(hp.clock_read_age()==40);
+    clock[24]=32; crc(clock); bus.feed(clock); hp.process(); assert(hp.clock_read_sequence()==sequence);
+    clock[24]=25; clock.back()^=1; bus.feed(clock); hp.process(); assert(hp.clock_read_sequence()==sequence);
+  }
+  {
+    // Live 2026-10-25 minute write and independent readback; no optimistic cache.
+    Bus bus; comfortzone_heatpump hp(&bus);
+    assert(hp.begin_write(Kind::MINUTE,3)); ready(hp,bus); test_millis+=40; hp.poll_write();
+    const std::vector<byte> captured_ack={0x45,0x72,0x69,0x63,0xae,0x23,0x65,0x6f,0xde,0x2,0x17,0x77,0x1,0x2,0x3,0x4,0xb,0x8,0x1,0x5,0x0,0x3,0x60};
+    bus.feed(captured_ack); hp.process(); assert(hp.write_result()==Result::SUCCESS);
+    assert(hp.clock_read_sequence()==0);
+    const std::vector<byte> captured_clock={0x41,0x44,0x44,0x52,0x7,0x8a,0x65,0x6f,0xde,0x2,0x76,0x72,0x1,0x2,0x3,0x4,0xb,0x8,0x1,0x4,0x0,0x15,0x3,0x24,0x19,0xa,0x1a,0x7,0x0,0x15,0x3,0x24,0x0,0x0,0x40,0x0,0x40,0x0,0x0,0x0,0x28,0x1a,0x0,0x0,0x16,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x41,0x19,0xfc,0x19,0xfc,0x5e,0x0,0x1,0x1,0xb,0x1,0xec,0x0,0x15,0x1,0xc,0x1,0x52,0x0,0x83,0x0,0x22,0xfc,0x22,0xfc,0x5,0x1,0x22,0xfc,0x22,0xfc,0x22,0xfc,0x22,0xfc,0x22,0xfc,0x22,0xfc,0x22,0xfc,0x22,0xfc,0x22,0xfc,0x22,0xfc,0x22,0xfc,0x22,0xfc,0x22,0xfc,0xf,0x2,0x14};
+    test_millis+=100; bus.feed(captured_clock); hp.process();
+    assert(hp.clock_read_sequence()==1 && hp.clock_read_age()==0);
+    assert(hp.comfortzone_status.hour==21 && hp.comfortzone_status.minute==3);
   }
   size_t replayed = 0;
   if (argc == 2) {
