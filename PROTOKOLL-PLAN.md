@@ -7,7 +7,7 @@ Påbörjat 2026-10-25 kväll: jämfört sju fångster, tagit en ny passiv tremin
 och sparat 14 råfixtures. Första resultatet är en möjlig uppdelning mellan
 värmefrekvens, varmvattenfrekvens och faktisk frekvens, samt ett konkret
 motexempel mot att bara ta maxvärdet. Se [PROTOKOLL-170.md](PROTOKOLL-170.md).
-Nästa belägg är panelens driftläge vid en övergång; registerkartan och
+Den efterföljande paneljämförelsen beskrivs nedan; registerkartan och
 protokollmotorns migrering är ännu inte implementerade.
 
 Senare samma kväll: panelbekräftad husvärme och ett kontrollerat test av Extra
@@ -37,6 +37,36 @@ hör hemma här. Biblioteket importeras som ett låst snapshot enligt
 [CONTRIBUTING.md](CONTRIBUTING.md). Befintliga entitets-ID:n ska bevaras.
 
 ## Arbetsordning och klarkriterier
+
+### Versionsjämförelse: skilj läsområde från fältlayout
+
+Kodjämförelse 2026-10-25, bibliotek `9d607b7161fb`: de äldre C++-strukturerna
+är bibliotekets tolkningar av fångade svar, inte tillverkarens formatspecifikation.
+Olika strukturnamn eller paketlängder bevisar därför inte olika protokoll.
+
+- Version 160, 170 och 180 kopplar området `01:0000` till samma funktion
+  `reply_r_status_02`. Adressprefixen slutar däremot på `0b07`, `0b08`, `0b09`.
+- Version 180 och 221 använder båda `reply_r_status_v180_runtime_and_energy`
+  för `05:0028`, trots olika prefix och kommenterade svarslängder.
+- Inom 170 kan faktisk frekvens `01:02e9` läsas både i korta svar från
+  `01:02b4` och i det äldre blocket från `01:02c7`. Fältets position i svaret
+  skiljer sig, men registeradressen är densamma. Detta täcks av regressionstest.
+- Biblioteket innehåller också olika parameteradresser: värmebörvärdet anges
+  som `00:02a6` för 170 och `00:0290` för 221. Det är skäl att behålla
+  versionsprofiler tills motsvarande fält jämförts mot rådata och panel.
+
+Jämför därför alltid `startadress + fältoffset`, bytebredd, skala och bitbetydelse.
+Gruppera gemensamma fält först efter belägg; lagra verkliga avvikelser i profiler.
+En möjlig förklaring till adressförskjutningar är tillagda interna parametrar,
+men detta är en hypotes. Gemensam transport och generiska områdesläsningar
+innebär inte att alla fälts betydelse kan upptäckas automatiskt.
+
+Den uppladdade manualen `Manual-ex35-ex50-ex65-g2-2018-11-02.pdf`, CZ06525
+Ver G2, anger på omslaget **fr.o.m. SW 1.8 och SN-1815xxxxxx**. Den är en
+kompletterande källa för menyer och versionsjämförelse, inte i sig bevis för
+funktioner eller register på pumpen med protokoll 170. Avfrostnings-/smältningsfel
+behandlas på sidorna 57 och 60; sökbar text bekräftar inte betydelsen av den
+blinkande symbol som observerades under paneltestet.
 
 ### 1. Beskriv paketformatet och bygg en reproducerbar referens
 

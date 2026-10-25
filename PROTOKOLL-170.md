@@ -338,3 +338,26 @@ byggde TX26-konfigurationen 2026-10-25 19:10:17 utan C++-varningar, med
 bibliotekssnapshot `9d607b7161fbe2282a4a89607ff4f9772d9ef2fc`.
 Ingen OTA utfördes under denna kontroll; installation via HA kan hämta fixen
 från samma arbetsgren.
+
+
+## OTA-verifiering av faktisk frekvens, 2026-10-25 kväll
+
+Frekvensfixen installerades på ersättningskortet 192.168.3.179, MAC
+08:B6:1F:38:5A:C0. Firmware är byggd 19:10:17 +0100 med bibliotek
+`9d607b7161fb`, ESPHome 2026.10.0 och ESP-IDF 5.5.6. OTA lyckades.
+Efterkontrollen gav 192 sekunders uptime och resetorsaken OTA-omstart.
+RS485-räknaren ökade utan CRC-fel. Värmebörvärde 29,1 °C, varmvattenbörvärde
+53,1 °C, kurva 5 och fläktläge Low var kvar; inga pumpinställningar skrevs.
+
+En separat 40-sekunders passiv fångst gav 106 CRC-giltiga ramar. Tre
+fullständiga råavläsningar av `01:02e9` gav 300, alltså 30,0 Hz. ESPHome
+publicerade samma 30,0 Hz (fyra tillståndshändelser inklusive initialt tillstånd).
+Det är en kontroll av rådata mot publicering, inte en ny oberoende panelavläsning.
+Kontrollen visar fungerande drift efter OTA, inte ett långtidstest. Driftläge och
+fördelad CoP återstår att verifiera; de senare är fortfarande okända.
+
+Lokala granskningsunderlag:
+- `/home/bjwl/comfortzone-frequency-release-20261025-1915/`: firmware, SHA256,
+  verifieringsskript, `verification.json` och logg.
+- `/home/bjwl/comfortzone-frequency-postota-20261025-1915/`: `capture.pcap`,
+  `events.json` och logg. UDP-fångsten garanterar inte komplett busstrafik.
