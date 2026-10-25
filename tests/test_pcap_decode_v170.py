@@ -5,7 +5,7 @@ import sys
 import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from pcap_decode_v170 import Frame, decode_fields, event_snapshot, valid_frame
+from pcap_decode_v170 import Frame, decode_fields, event_snapshot, valid_frame, crc8
 
 FIXTURES = json.loads(Path(__file__).with_name('v170_capture_fixtures.json').read_text())['frames']
 
@@ -15,6 +15,27 @@ def frame(reg, time=100):
 
 
 class DecodeTest(unittest.TestCase):
+    def test_scalar_schema_signed_bounds_and_partial_fields(self):
+        def sample(bank, address, payload, prefix=8):
+            raw = bytearray(frame('010000').raw[:21])
+            raw[10] = 22 + len(payload)
+            raw[17] = prefix
+            raw[18] = bank
+            raw[19:21] = address.to_bytes(2, 'little')
+            raw.extend(payload)
+            raw.append(crc8(raw))
+            self.assertTrue(valid_frame(raw))
+            return decode_fields(Frame(0, bytes(raw)))
+        self.assertEqual(sample(1, 0x32, b'\x85\xff')['te0_c'], -12.3)
+        self.assertIsNone(sample(1, 0x32, b'\x22\xfc')['te0_c'])
+        self.assertEqual(sample(0, 0x3ec, b'\x85\xff')['extra_hot_water_target_c'], -12.3)
+        self.assertEqual(sample(0, 0x2a5, b'\x0b'), {})
+        self.assertEqual(sample(0, 0x373, b'\xe9\x03'), {})
+        self.assertEqual(sample(5, 0x2c, b'\x01\x02\x03'), {})
+        self.assertEqual(sample(5, 0x2f, b'\x04'), {})
+        self.assertEqual(sample(1, 0x32, b'\x85\xff', prefix=9), {})
+        self.assertEqual(sample(1, 0xffff, b'\x00\x00'), {})
+
     def test_frequency_through_hot_water_and_stop(self):
         cases = json.loads(Path(__file__).with_name('v170_frequency_fixtures.json').read_text())['frames']
         for case in cases:

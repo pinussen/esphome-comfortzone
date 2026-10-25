@@ -1,9 +1,10 @@
 {
   "repository": "https://github.com/pinussen/comfortzone_heatpump",
-  "commit": "9d607b7161fbe2282a4a89607ff4f9772d9ef2fc",
+  "commit": "3a7bf47ccce45a602081d628e8761733e9669236",
   "sha256": {
     "LICENSE": "589ed823e9a84c56feb95ac58e7cf384626b9cbf4fda2a907bc36e103de1bad2",
     "README.txt": "1c16d8d349bbbf801979650eb649b9e8fc3e5e4e2c2d7675d5366098966d1055",
+    "REGISTERS-170.md": "5a84606baa2b7d4ade5948fdfe4a5bec8a80252fa7bf778f56adbb1ece92c4ec",
     "comfortzone_config.h": "54527fd2792f9e8528c093f73efe76178787e69eb5cf6717c6c3afb6b7a7c34d",
     "comfortzone_crafting.cpp": "b284d0b7e90316846954d490ab227c938938e0d64a2e68d78b621c6e0a85c575",
     "comfortzone_crafting.h": "2950710844746ec73101f8be5fab728fe81d3828124ea0a16ce2b3053d36db2a",
@@ -11,16 +12,19 @@
     "comfortzone_decoder.h": "d88640effd6d8e77e5c27e0ccb4adf74cf68d188380c3478511998f065fdc90b",
     "comfortzone_decoder_basic.cpp": "d22e6bd5cfc7e5f8082ffa5bd951e06e1330ced11e967dc7a04f775152e8ec21",
     "comfortzone_decoder_status.cpp": "00db15a6b6b603ff3ae89e85082da31a54b2ddd8b3ef468d5022333c131fb236",
-    "comfortzone_decoder_v170.cpp": "64c3df63f3f5dca8d6a3efa24eb626e0cd1a3f3c6512c275c0fa2ac97063f828",
+    "comfortzone_decoder_v170.cpp": "cc116f22a2da105be89747e6309e8c40e9822ab9ca7a4a2cc57603887f55f2e7",
     "comfortzone_frame.h": "0ae904b6b09a763d3838491abbe3b86654951d9ff2ede9436d07ffc57b9e4101",
     "comfortzone_heatpump.cpp": "32b295cc7d216c88057a2ef66f265fb2351460194d691c65731b7ccf6a62cf97",
     "comfortzone_heatpump.h": "c77240bbc1d80f7ee7937cb0d820b440aa85d308c2e6a634a8733fa7aab9ba45",
+    "comfortzone_registers_v170.h": "c975196298c43f8544eed4f6d136b6c6585dcc208b751654a9560d745e4025c1",
     "comfortzone_status.h": "bf90bb6895be4f9643e5a89888f2cda7bf94bd071eaab9d28c1837ec306a8c12",
     "comfortzone_tools.h": "c8d827acc4ece7fc7f6b3a92267adc5d77008d295ec3c8fa796d0575c89edc56",
     "comfortzone_write.cpp": "958d95aa4780e3a789824ac7a8a21db7170973609f441eade86f94f3ad3739fb",
     "library.json": "14dfb8673efa49c47f01c6b6c10c2d16b1bdf3081faef94692bf5acb38109d85",
     "library.properties": "78dcfd554540914542ba7350c2be1bb7f2537fc44cfe65e3580f77b91491c65d",
     "platform_specific.h": "0163bd1307a8df2d514d8dc21a02fe35a96e38f21213a792e588043c971c7448",
-    "rs485_interface.h": "d3e1e0c071239e9c4319ace90986b1354a7867d5bb7d9ceb0e71b29cb95a3da4"
+    "registers_v170.json": "84a761d14937e76a325dd42ee6c68fc6104fb2fc54ad42e365d09dd34392c780",
+    "rs485_interface.h": "d3e1e0c071239e9c4319ace90986b1354a7867d5bb7d9ceb0e71b29cb95a3da4",
+    "tools/generate_registers.py": "c464d13ef5370f0836922ad11748096816ccab06a0a6c1e5cd9a055106fe99a8"
   }
 }

@@ -7,8 +7,8 @@ Påbörjat 2026-10-25 kväll: jämfört sju fångster, tagit en ny passiv tremin
 och sparat 14 råfixtures. Första resultatet är en möjlig uppdelning mellan
 värmefrekvens, varmvattenfrekvens och faktisk frekvens, samt ett konkret
 motexempel mot att bara ta maxvärdet. Se [PROTOKOLL-170.md](PROTOKOLL-170.md).
-Den efterföljande paneljämförelsen beskrivs nedan; registerkartan och
-protokollmotorns migrering är ännu inte implementerade.
+Den efterföljande paneljämförelsen beskrivs nedan. En första registertabell för
+170 har nu införts; en fullständig protokollmotor och övriga profiler återstår.
 
 Senare samma kväll: panelbekräftad husvärme och ett kontrollerat test av Extra
 varmvatten gav både uppvarvning och noll frekvens/effekt efter nedvarvning.
@@ -16,6 +16,14 @@ Frekvensavkodningen är nu rättad från 01:02d5 till 01:02e9 med fångade
 regressionstestfall. Extrafunktionen stängdes av på panelen. Statusbitar för
 begäran och faktisk drift måste fortfarande särskiljas innan CoP-fördelningen
 kan aktiveras; det gäller särskilt 0x2E och stoppfallet 0x1E.
+
+Nästa genomförda steg samma kväll: 34 befintliga skalära fält har flyttats till
+bibliotekets `registers_v170.json`. Samma källa genererar en statisk C++-tabell
+och referensdokumentation, och används direkt av offlineanalysen. Firmware
+behöver ingen JSON-tolk eller full registercache. Klocka, härledda larmflaggor,
+skrivningar och experimentella format är fortsatt separata. Tabellen skiljer
+ärvda tolkningar från fångstbelägg och panelobservationer; migreringen tillför
+inte nya verifierade registerbetydelser.
 
 ## Mål och utgångsläge
 
@@ -173,7 +181,8 @@ och dess dagliga integral är separata från denna fördelning.
 
 Wi-Fi-signalen rapporteras som -91 dB och ett API-avbrott syns. Det är en möjlig
 nätverksförklaring, inte bevis för en firmwarekrasch. Protokollanalys ska även
-notera logg-/fångstluckor. Ingen ny OTA eller pumpinställning ändras för denna plan.
+notera logg-/fångstluckor. Den första planversionen ändrade inga pumpinställningar;
+efterföljande firmwareinstallationer dokumenteras i PROTOKOLL-170.md.
 
 Tillhörande underhåll: rättade C++-loggformat, tog bort varningar från tomma
 debug-makron och undertryckte upprepade `nan` för de fyra härledda sensorerna.

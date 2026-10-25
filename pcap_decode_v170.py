@@ -16,7 +16,10 @@ from pathlib import Path
 import statistics
 import struct
 
-PREFIX = bytes.fromhex("010203040b08")
+REGISTER_SCHEMA = json.loads((Path(__file__).resolve().parent /
+    'components/comfortzone/third_party/comfortzone_heatpump/registers_v170.json').read_text())
+PREFIX = bytes.fromhex(REGISTER_SCHEMA['prefix'])
+REGISTER_TYPES = {'u8': (1, False), 'u16': (2, False), 'i16': (2, True), 'u32': (4, False)}
 
 
 def crc8(data):
@@ -103,26 +106,22 @@ def valid_frame(p):
 
 
 def decode_fields(f):
-    """Existing established mappings plus explicitly marked new candidates."""
+    """Schema read mappings plus explicitly marked experimental candidates."""
     result = {}
-    if f.bank == 0:
-        for addr, name, scale, size in [(0x2a5, 'heating_curve', 1, 1),
-                (0x2a6, 'heating_setting_c', 10, 2), (0x373, 'hot_water_setting_c', 10, 2),
-                (0x419, 'filter_days', 1, 2), (0x3fa, 'fan_mode', 1, 1),
-                (0x3d2, 'hot_water_max_runtime_minutes', 1, 1),
-                (0x3d3, 'hot_water_pause_minutes', 1, 1),
-                (0x3e4, 'hot_water_min_frequency_hz', 10, 2),
-                (0x3e6, 'hot_water_max_frequency_hz', 10, 2),
-                (0x3ec, 'extra_hot_water_target_c', 10, 2),
-                (0x3ee, 'extra_hot_water_minutes', 1, 2),
-                (0x3fb, 'normal_fan_percent', 10, 2)]:
-            if (b := f.read(addr, size)) is not None:
-                result[name] = int.from_bytes(b, 'little') / scale
-    elif f.bank == 1:
-        for index in [*range(8), 10, 24]:
-            if (b := f.read(0x32+2*index, 2)) is not None:
-                raw = int.from_bytes(b, 'little', signed=True)
-                result[f'te{index}_c'] = None if raw in (-990, -999) else raw / 10
+    if f.raw[11:12] != b'r' or f.raw[12:18] != PREFIX or f.address + len(f.data) > 65536:
+        return result
+    for field in REGISTER_SCHEMA['fields']:
+        if field['bank'] != f.bank:
+            continue
+        size, signed = REGISTER_TYPES[field['type']]
+        if (b := f.read(int(field['address'], 16), size)) is None:
+            continue
+        value = int.from_bytes(b, 'little', signed=signed)
+        if 'raw_bounds' in field and not field['raw_bounds'][0] <= value <= field['raw_bounds'][1]:
+            continue
+        result[field['offline_name']] = (None if value in field.get('invalid_raw', []) else
+            value if field.get('offline_raw', False) else value / field['divisor'])
+    if f.bank == 1:
         if (b := f.read(4, 6)) is not None:
             hour, minute, second, day, month, year = b
             try:
@@ -131,11 +130,6 @@ def decode_fields(f):
                     result['weekday_raw'] = weekday[0]
             except ValueError:
                 result['invalid_clock_hex'] = b.hex()
-        for address, name in [(0x1f, 'pending_alarm_mask'), (0x27, 'acknowledged_alarm_mask'),
-                (0x2e9, 'compressor_frequency_raw'), (0x313, 'compressor_output_w'),
-                (0x317, 'additional_power_w'), (0x319, 'total_output_w'), (0x321, 'compressor_input_w')]:
-            if (b := f.read(address, 2)) is not None:
-                result[name] = int.from_bytes(b, 'little')
         # 12 float32 values repeated in two neighbouring arrays. Sensor names
         # remain candidates: close numerical agreement does not prove semantics.
         for addr in (0xe1, 0x111):
@@ -143,11 +137,6 @@ def decode_fields(f):
                 vals = struct.unpack('<12f', b)
                 result[f'candidate_float_temperatures_{addr:04x}'] = [
                     round(v/10, 5) if abs(v) < 1e6 else None for v in vals]
-    elif f.bank == 5:
-        for i, name in enumerate(('compressor_kwh', 'additional_kwh', 'hot_water_kwh',
-                                  'compressor_runtime_minutes', 'total_runtime_minutes')):
-            if (b := f.read(0x2c+4*i, 4)) is not None:
-                result[name] = int.from_bytes(b, 'little') / (100 if i < 3 else 1)
     return result
 
 

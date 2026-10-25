@@ -361,3 +361,30 @@ Lokala granskningsunderlag:
   verifieringsskript, `verification.json` och logg.
 - `/home/bjwl/comfortzone-frequency-postota-20261025-1915/`: `capture.pcap`,
   `events.json` och logg. UDP-fångsten garanterar inte komplett busstrafik.
+
+
+## Gemensam registertabell, 2026-10-25 kväll
+
+Bibliotek `3a7bf47ccce4` flyttar 34 befintliga skalära läsfält till
+`registers_v170.json`. Den genererade C++-tabellen och offlineverktyget använder
+samma adresser, datatyper, skalor och gränser. Fältens tidigare säkerhetsgrad
+bevaras; detta är en migrering, inte 34 nya verifierade betydelser. Skrivningar,
+klocka, härledda larmflaggor och experimentella format är separata.
+
+Verifiering före installation:
+- Differentiell C++-jämförelse mot föregående avkodare `9d607b7161fb`: samma
+  värden och giltighetsflaggor i 47 305 fall, inklusive de 1 675 fångade ramarna
+  från paneltestet och syntetiska läsningar kring fältgränser. ASan/UBSan användes.
+- Offlineavkodningen gav samma resultat på 970 lässvar i tre fångster.
+  För syntetiska felvärden följer den nu även firmwaregränserna; extra
+  varmvattenbörvärde tolkas konsekvent som signed 16-bit.
+- 13 Python-testfall samt protokoll-170-test med återspelning passerade.
+  Version 160, 180 och 221 passerade vardera 200 adresser × 234 svarslängder
+  under ASan/UBSan. Detta verifierar inte deras fysiska registerbetydelser.
+- ESPHome 2026.10.0 / ESP-IDF 5.5.6 byggde utan kompilatorvarningar.
+  Flash 816 639 byte; statiskt RAM 49 300 byte, oförändrat från föregående bygge.
+
+Firmware byggd 19:28:00 +0100 installerades via OTA på 192.168.3.179.
+Kortet rapporterade bibliotek `3a7bf47ccce4`, ökande ramräknare utan CRC-fel
+och lyckad uppstart. Lokalt verifieringsunderlag och firmware sparas i
+`/home/bjwl/comfortzone-schema-release-20261025-1930/`.

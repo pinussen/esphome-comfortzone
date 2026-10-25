@@ -30,13 +30,16 @@ def main():
     if args.import_from:
         source = args.import_from.resolve()
         commit = git(source, 'rev-parse', 'HEAD').decode().strip()
-        files = [f for f in git(source, 'ls-tree', '--name-only', commit).decode().splitlines()
-                 if f.endswith(('.cpp', '.h')) or f in ('library.json','library.properties','LICENSE','README.txt')]
+        files = [f for f in git(source, 'ls-tree', '-r', '--name-only', commit).decode().splitlines()
+                 if ('/' not in f and f.endswith(('.cpp', '.h')))
+                 or f in ('library.json','library.properties','LICENSE','README.txt',
+                          'registers_v170.json','REGISTERS-170.md','tools/generate_registers.py')]
         if not files or 'comfortzone_heatpump.cpp' not in files:
             raise SystemExit('Not a comfortzone_heatpump source checkout')
         hashes = {}
         for name in sorted(files):
             data = git(source, 'show', f'{commit}:{name}')
+            (VENDOR / name).parent.mkdir(parents=True, exist_ok=True)
             (VENDOR / name).write_bytes(data)
             hashes[name] = digest(data)
         LOCK.write_text(json.dumps({'repository': 'https://github.com/pinussen/comfortzone_heatpump',

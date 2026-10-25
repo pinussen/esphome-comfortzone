@@ -16,6 +16,15 @@ The sync script reads files from the specified checkout's **committed HEAD**.
 Uncommitted sibling edits are deliberately not imported. Editing the vendor copy
 without updating its snapshot is detected by `--check`.
 
+Protocol-170 scalar read mappings live in the library's `registers_v170.json`.
+After changing a mapping, run `python3 tools/generate_registers.py` there,
+then test and commit the schema, generated header and reference together.
+The vendored snapshot includes these files and the generator; Python tests
+check that generated files match the schema. `pcap_decode_v170.py` reads the
+vendored schema directly. Evidence levels distinguish inherited interpretations
+from capture comparisons and panel observations. Ordinary read mappings do not
+authorize writes; command encoding and write limits remain separate.
+
 FastCRC revision: `c25258960e313a68237bf62db08770707955b82b` from
 https://github.com/vinnyspb/FastCRC. Clone it outside this repo for host tests.
 
