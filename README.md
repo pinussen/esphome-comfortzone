@@ -21,7 +21,8 @@ hardware diagnosis, deployment and live write tests.
   Truncated fields and replies from another pump are not combined with old buffer contents.
 - Optional `comfortzone-protocol170.yaml`: ventilation Low/Normal/High, heating curve,
   start/stop extra-hot-water buttons, eleven additional sensors, pump clock and write result.
-- A single asynchronous write at a time. Values are not confirmed merely because a request
+- A single asynchronous write at a time: up to 15 seconds waiting for a safe bus gap,
+  then 200 ms for acknowledgement. Values are not confirmed merely because a request
   was queued. No automatic resend after a missing acknowledgement.
 - Bounded UDP frame/raw-UART diagnostics and offline PCAP analysis.
 

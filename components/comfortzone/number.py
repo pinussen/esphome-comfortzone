@@ -11,6 +11,6 @@ CONFIG_SCHEMA = number.number_schema(CurveNumber, icon="mdi:chart-bell-curve", e
 })
 async def to_code(config):
     var = cg.new_Pvariable(config[CONF_ID])
-    await number.register_number(var, config, min_value=0, max_value=10, step=1)
+    await number.register_number(var, config, min_value=1, max_value=10, step=1)
     hub = await cg.get_variable(config[CONF_COMFORTZONE_ID])
     cg.add(hub.set_curve_number(var))

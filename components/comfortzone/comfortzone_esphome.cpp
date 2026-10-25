@@ -642,6 +642,7 @@ namespace esphome::comfortzone
   void ComfortzoneComponent::dump_config()
   {
     ESP_LOGCONFIG(TAG, "Comfortzone initialized, protocol=%d, asynchronous writes", HP_PROTOCOL);
+    ESP_LOGCONFIG(TAG, "Library snapshot: %s", CZ_LIBRARY_REVISION);
     ESP_LOGCONFIG(TAG, "Controller address: %08lX", static_cast<unsigned long>(controller_address_));
     ESP_LOGCONFIG(TAG, "Physical RX edge detection: %s (GPIO%d)",
                   rs485_adapter_->edge_detection_ready() ? "enabled" : "disabled", rx_idle_pin_);

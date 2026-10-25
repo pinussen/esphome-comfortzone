@@ -23,7 +23,7 @@ Menynamn i en senare manual bevisar inte registeradresser för protokoll 170.
 | Varmvattentemperatur | Hög prioritet | Climate, `00:0373`, samma avkodade mål som panelens tidigare bekräftade 53,1 °C. |
 | Extra varmvatten | Tillfällig behovsstyrning | Start/stopp-knappar, befintliga bitkommandon `81/41:0017`. Pumpens timer sköter återgången. |
 | Fläktläge | Praktiskt vid frånvaro/forcering | Select Low/Normal/High; `00:03fa`. Lägenas exakta luftflöden beror på injusteringen. |
-| Värmekurva | Konfiguration | Number 0–10, `00:02a5`; paneländringar 3–6 finns dokumenterade i råtrafiken. Inte förstahandsval för täta prisändringar. |
+| Värmekurva | Konfiguration | Number 1–10, `00:02a5`; paneländringar 3–6 finns dokumenterade i råtrafiken. Inte förstahandsval för täta prisändringar. |
 | Varmvattenprioritet | Nästa steg | Låg/normal/hög finns i manualen; 170-adress ännu inte belagd. |
 | Semestersänkning | Nästa steg | Kräver fångst när panelens värde ändras. |
 | Min returtemperatur | Senare, installationsberoende | Menyval finns; register från andra versioner får inte återanvändas utan verifiering. |
@@ -37,7 +37,7 @@ visas för diagnostik. Ingen elprisautomation installeras av denna ändring.
 
 | Område | Fynd | Åtgärd |
 | --- | --- | --- |
-| API-skrivningar | Synkron väntan blockerade ESPHomes loop | En transaktion i taget, asynkron bussväntan och ACK, ingen automatisk omsändning efter oklart resultat. |
+| API-skrivningar | Synkron väntan blockerade ESPHomes loop | En transaktion i taget, upp till 15 s asynkron bussväntan och 200 ms ACK-väntan, ingen automatisk omsändning efter oklart resultat. |
 | RX/parser | Nollbrus och halvfärdiga ramar kunde blockera skrivning | Bunden timeout; fysisk RX-detektering som tillval; möjliga frågor får inte räknas som ledig buss. |
 | Protokoll 170 | Återanvända strukturer från andra versioner och paketstorleksberoende gav fel fält | Adressbaserad avkodning. Hela fältet måste finnas i ett CRC-giltigt svar från rätt pump. |
 | Äldre statusavkodare | Strukturfält lästes utan att kontrollera ramlängden | Längdskydd vid 53 strukturtolkningar. Andra protokoll har endast värddatortester, inga pumpförsök här. |

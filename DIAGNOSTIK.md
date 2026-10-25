@@ -690,7 +690,7 @@ Källgenomgång och manualprioritering finns i `CODE-REVIEW.md`. Bibliotekets
 snapshot finns i `comfortzone_heatpump.lock.json`; biblioteket och ESPHome har
 arbetsgrenen `feature/ex50-register-controls`.
 
-Slutligt livebygge: ESPHome 2026.10.0 / ESP-IDF 5.5.6,
+Bygge för skrivproven nedan: ESPHome 2026.10.0 / ESP-IDF 5.5.6,
 kompilering `2026-10-25 14:27:21 +0100`, TX26/RX16/DE21.
 OTA lyckades, med cirka tio sekunders överföring. Samma ersättningskort som
 tidigare, MAC `08:B6:1F:38:5A:C0`. Inga oplanerade omstarter eller CRC-fel
@@ -751,3 +751,29 @@ Protokoll 160/180/221 kompilerar och passerar vardera 200 registeradresser × 23
 ramlängder; inga andra fysiska pumpversioner har testats. Sju Python-tester
 passerar. Både fullt TX26-bygge och climate utan sensor/text/binary-plattformar
 har kompilerats. CI kör värddatortesterna för båda repona.
+
+### Anpassad kötid för långsam polling
+
+De fem VV-återläsningarna ligger omkring sju sekunder isär. En fem sekunders
+kötid kan därför missa nästa kompletta läsomgång, särskilt när senaste svaret
+redan är äldre än den tillåtna sändningsluckan. Kötiden har höjts till 15 sekunder
+så att väntan kan sträcka sig över två sådana omgångar. Loopen fortsätter att
+köra; samma krav på färskt svar, tyst buss och tom RX-buffert gäller. Efter
+sändning är ACK-gränsen fortfarande 200 ms, utan automatisk omsändning.
+Regressionstestet lägger ett svar sju sekunder efter köläggningen.
+
+Det fördröjda liveprovet lyckades också: VV 53,1 → 53,1 °C köades 1,25 s efter
+ett räknarsvar och kvitterades efter 5,996 s, alltså längre än den tidigare
+femsekundersgränsen. CRC-giltigt ACK fångades. Underlag:
+`/home/bjwl/comfortzone-poll-wait-2026-10-25/`.
+
+Värmekurvan har slutligen begränsats till **1–10**, enligt manualens sida 33.
+Startloggen innehåller nu bibliotekets snapshot-commit så att installerad kod
+kan identifieras även om ESPHome återanvänder en äldre byggtidsstämpel.
+
+Slutligt installerat bygge: `2026-10-25 14:41:54 +0100`, bibliotek
+`42fc534477553c63f765521fe2cc57d9d0762589`. OTA slutfördes på cirka åtta sekunder.
+Efterkontrollen bekräftade kurvgräns 1–10 i API:t, kurva 5, fläkt Low,
+VV 53,1 °C, pumpklocka och uptime 91.8 s. Safe mode
+markerade uppstarten som lyckad; inga CRC-fel sågs. Kontrollskript, logg,
+firmware och SHA256 finns i `/home/bjwl/comfortzone-release-2026-10-25/`.

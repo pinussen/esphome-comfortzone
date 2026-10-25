@@ -1,3 +1,4 @@
+import json
 from pathlib import Path
 
 import esphome.codegen as cg
@@ -77,6 +78,9 @@ async def to_code(config):
         var_global_offset = await cg.get_variable(config[CONF_TE3_OFFSET_GLOBAL_ID])
         cg.add(var.set_te3_offset_global(var_global_offset))
 
+    snapshot = json.loads((Path(__file__).resolve().parent / "third_party" /
+                           "comfortzone_heatpump.lock.json").read_text())
+    cg.add_define("CZ_LIBRARY_REVISION", snapshot["commit"][:12])
     cg.add_library("FastCRC", version=None, repository="https://github.com/vinnyspb/FastCRC.git#c25258960e313a68237bf62db08770707955b82b")
     # Link the exact bundled sources; file:// leaves a stale copy after edits.
     library_path = "symlink://" + str(Path(__file__).resolve().parent / "third_party" / "comfortzone_heatpump")
