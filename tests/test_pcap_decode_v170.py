@@ -15,6 +15,22 @@ def frame(reg, time=100):
 
 
 class DecodeTest(unittest.TestCase):
+    def test_panel_confirmed_heating_samples(self):
+        samples = json.loads(Path(__file__).with_name('v170_panel_heating_fixtures.json').read_text())
+        for sample in samples['observations']:
+            power = Frame(0, bytes.fromhex(sample['power_reply']['raw']))
+            status = Frame(0, bytes.fromhex(sample['preceding_status_reply']['raw']))
+            self.assertTrue(valid_frame(power.raw))
+            self.assertTrue(valid_frame(status.raw))
+            self.assertEqual(power.device, status.device)
+            decoded = decode_fields(power)
+            self.assertAlmostEqual(decoded['compressor_frequency_raw'] / 10,
+                                   sample['panel_frequency_hz'])
+            self.assertEqual(decoded['compressor_output_w'], sample['panel_power_w'])
+            self.assertEqual(decoded['additional_power_w'], sample['panel_additional_power_w'])
+            self.assertEqual(status.read(0x18, 1), b'\x2a')
+            # Evidence for this observed heating state, not all enum/bit meanings.
+
     def test_crc_rejects_corruption_and_truncation(self):
         for raw in FIXTURES.values():
             p = bytes.fromhex(raw)

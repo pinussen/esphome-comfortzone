@@ -1,0 +1,37 @@
+{
+  "capture": "/home/bjwl/comfortzone-panel-heating-20261025-185925/capture.pcap",
+  "capture_sha256": "da87d3380c792221435fab654ff4c4648617c6c5ca784bdcbf40116dc793d605",
+  "note": "Panel readings supplied during capture, without exact timestamps. Multiple frequency/output fields agree; these fixtures do not distinguish actual vs requested frequency, or compressor vs total output when auxiliary heat is zero.",
+  "observations": [
+    {
+      "panel_frequency_hz": 28.7,
+      "panel_power_w": 2282,
+      "panel_mode": "house_heating",
+      "panel_additional_power_w": 0,
+      "panel_time_exact": null,
+      "power_reply": {
+        "time_utc": "2026-10-25T17:59:28.865446+00:00",
+        "raw": "41444452078a656fde02a572010203040b0801b402130200000000000000000000000301610200000000e8038201eb0048002000bb001f0100001f01dcfeaaffaeffa5fd00001f011f011f011f0100000f013403740888133601000000000000000000005e01000000000000000000005c2b0000ea0800000000ea080000ea080000f8020000000000000a00003c00005301000000000000302a0000e703f500fffff20099"
+      },
+      "preceding_status_reply": {
+        "time_utc": "2026-10-25T17:59:28.536141+00:00",
+        "raw": "41444452078a656fde027672010203040b08010400130324190a1a07001303240000400040000000282a00001000000000000000000000000000000000004119fc19fc5d006a010a01ee0069027701ddffd3ff22fc22fc050122fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc100205"
+      }
+    },
+    {
+      "panel_frequency_hz": 28.6,
+      "panel_power_w": 2275,
+      "panel_mode": "house_heating",
+      "panel_additional_power_w": 0,
+      "panel_time_exact": null,
+      "power_reply": {
+        "time_utc": "2026-10-25T18:00:11.112438+00:00",
+        "raw": "41444452078a656fde02a572010203040b0801b402130200000000000000000000000301610200000000e8038301ec0048002000bb001e0100001e01ddfeaaffaeffa3fd00001e011e011e011e0100000f013403740888133601000000000000000000005e01000000000000000000005c2b0000e30800000000e3080000e3080000f8020000000000000d00003c00002901000000000000302a0000e703f500fffff0006c"
+      },
+      "preceding_status_reply": {
+        "time_utc": "2026-10-25T18:00:10.782635+00:00",
+        "raw": "41444452078a656fde027672010203040b08010400130412190a1a07001304120000400040000000282a00001000000000000000000000000000000000004119fc19fc5d006b010a01ee0068027801ddffd3ff22fc22fc050122fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc22fc0f02da"
+      }
+    }
+  ]
+}

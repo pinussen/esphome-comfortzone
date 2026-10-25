@@ -258,3 +258,28 @@ kontroller inom samma ram. Snabba identiska efterföljande lässvar (<100 ms)
 räknas separat. Ett litet urval av 14 CRC-kontrollerade råramar med ursprung
 finns i [tests/v170_operating_candidates.json](tests/v170_operating_candidates.json).
 Ingen ny registerbetydelse har aktiverats i firmware på grundval av dessa kandidater.
+
+### Panelbekräftelse: husvärme
+
+Användaren bekräftade därefter **Husvärme**, först 28,5 Hz / 2268 W / 0 W tillsats,
+sedan 28,7 Hz / 2282 W och 28,6 Hz / 2275 W. En ny passiv minut fångades i
+`/home/bjwl/comfortzone-panel-heating-20261025-185925/` med 180 UDP-payloads.
+Exakta paneltidsstämplar saknas, men båda senare värdeparen finns i fångsten:
+
+| Lokal fångsttid | 02d5 / 10 | 0313 | 0317 | Närmast föregående 0018 |
+| --- | --- | --- | --- | --- |
+| 18:59:28,865 | 28,7 Hz | 2282 W | 0 W | 0x2A, 0,329 s tidigare |
+| 19:00:11,112 | 28,6 Hz | 2275 W | 0 W | 0x2A, 0,330 s tidigare |
+
+Detta ger panelstöd för **0018 = 0x2A vid pågående husvärme** och för att de
+befintliga frekvens-/effektfälten matchar panelen i detta driftfall. Det första
+värdeparet 28,5 / 2268 har inte matchats i denna fångst som startade efter rapporten.
+Eftersom 02d5, 02d9 och 02e9 är lika här skiljer mätningen inte faktisk frekvens
+från begärd frekvens. Vid 0 W tillsats är även 0313 och 0319 lika, så deras
+respektive betydelse måste kontrolleras vid tillsatsdrift.
+
+Råramar och panelobservationer finns i
+[tests/v170_panel_heating_fixtures.json](tests/v170_panel_heating_fixtures.json)
+och ingår i offline-regressionstesterna. Nästa kontroll är samma panelavläsning
+under varmvattenproduktion och vid driftväxling. Ingen generell statusbitstolkning
+eller ny firmware har aktiverats utifrån bara husvärmefallet.
