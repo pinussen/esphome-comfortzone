@@ -283,3 +283,58 @@ Råramar och panelobservationer finns i
 och ingår i offline-regressionstesterna. Nästa kontroll är samma panelavläsning
 under varmvattenproduktion och vid driftväxling. Ingen generell statusbitstolkning
 eller ny firmware har aktiverats utifrån bara husvärmefallet.
+
+### Kontrollerad extra-varmvattensekvens och frekvensfix
+
+Fångst `/home/bjwl/comfortzone-panel-extra-hw-20261025-190250/`, sex minuter,
+1675 mottagna CRC-giltiga UDP-payloads: 839 R, 834 r, en W och en w.
+Råfilens SHA256: `f15d1da23147fd491f8c59bd084c1dc4bde3f3e74b22f622bb63c81e497cdf66`.
+Alla mottagna ramar klarar CRC; att antalen frågor/svar skiljer sig visar att
+detta inte är en garanterat komplett bussfångst.
+
+Användaren slog på Extra varmvatten, bekräftade varmvattenläge och **30 Hz /
+2376 W**, slog av funktionen och såg sedan nedvarvning, blinkande snöflinga
+med droppar och nollvärden. Symbolen är förenlig med avfrostning, men dess
+betydelse fastställdes inte genom manualens sökbara text. Detta är inte belägg
+för att avstängningen av extrafunktionen orsakade avfrostningen.
+
+| Lokal tid | Händelse / observation | 0017 | 0018 | 001b |
+| --- | --- | --- | --- | --- |
+| 19:03:03 | Husvärme före testet | 28 | 2A | 10 |
+| 19:03:13,056 | Panelens W: `81:0017`, mask `01 00` | — | — | — |
+| 19:03:14 | Extra varmvatten aktivt, panelen bekräftar varmvatten | 2B | 2E | 10 |
+| 19:04:09,742 | w till panelen: `41:0017`, returbyte `2E` | — | — | — |
+| 19:04:29 | Extra av, produktion fortsätter | 28 | 2E | 10 |
+| 19:05:04 | Övergång | 28 | AE | 10 |
+| 19:05:11 | Nedvarvning | 28 | BE | 10 |
+| 19:05:18 och framåt | Noll frekvens/effekt, snöflingesymbol rapporterad | 28 | 1E | 16 |
+
+Själva W för avstängningen och w för aktiveringen saknas i UDP-fångsten;
+de två fångade skrivramarna ska därför inte redovisas som ett komplett par.
+Ändringen `2B -> 28` i 0017 stödjer att extrafunktionen stängdes av. Status
+0018 och pågående varmvattenproduktion kvarstod därefter. Lägesbitarna kan
+beskriva samtidiga begäranden snarare än uteslutande aktuell värmeleverans.
+`0x2E` får alltså inte utan vidare klassas som både faktisk husvärme och varmvatten.
+
+| Råram | Äldre fält 02d5 | Kandidat begärd 02d9 | Faktisk 02e9 | Effekt 0313 |
+| --- | --- | --- | --- | --- |
+| Husvärme | 29,2 Hz | 29,2 Hz | 29,2 Hz | 2319 W |
+| Uppvarvning efter Extra på | 29,3 Hz | 30,0 Hz | 29,7 Hz | 2355 W |
+| Panelbekräftat varmvatten | 29,3 Hz | 30,0 Hz | 30,0 Hz | 2376 W |
+| Panelbekräftade nollvärden | 29,3 Hz | 0 Hz | 0 Hz | 0 W |
+
+**Frekvensavkodningen ändras till 01:02e9, LE16 / 10**, i både den generella
+170-avkodaren och den äldre Status 06-strukturen samt offlineverktyget.
+En statisk offsetkontroll skyddar strukturens fältplacering. Råramarna finns i
+[tests/v170_frequency_fixtures.json](tests/v170_frequency_fixtures.json).
+Hosttesterna kontrollerar hela sekvensen, den äldre avkodningsvägen och
+avklippta frekvensfält. Driftläge, CoP-fördelning och avfrostningsbitar aktiveras
+inte genom denna ändring; de behöver separat validering av begäran kontra drift.
+
+Validering: nio Python-tester, hosttester under ASan/UBSan inklusive återspelning
+av samtliga 1675 fångade payloads, samt gränstester för 160/180/221 (200
+registeradresser × 234 längder per version). ESPHome 2026.10.0 / ESP-IDF 5.5.6
+byggde TX26-konfigurationen 2026-10-25 19:10:17 utan C++-varningar, med
+bibliotekssnapshot `9d607b7161fbe2282a4a89607ff4f9772d9ef2fc`.
+Ingen OTA utfördes under denna kontroll; installation via HA kan hämta fixen
+från samma arbetsgren.

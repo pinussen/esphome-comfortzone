@@ -15,6 +15,17 @@ def frame(reg, time=100):
 
 
 class DecodeTest(unittest.TestCase):
+    def test_frequency_through_hot_water_and_stop(self):
+        cases = json.loads(Path(__file__).with_name('v170_frequency_fixtures.json').read_text())['frames']
+        for case in cases:
+            f = Frame(0, bytes.fromhex(case['raw']))
+            self.assertTrue(valid_frame(f.raw))
+            values = decode_fields(f)
+            self.assertEqual(values['compressor_frequency_raw'], case['actual_frequency_raw'])
+            self.assertEqual(values['compressor_output_w'], case['output_w'])
+        self.assertEqual(cases[-1]['actual_frequency_raw'], 0)
+        self.assertNotEqual(cases[-1]['legacy_frequency_raw'], 0)
+
     def test_panel_confirmed_heating_samples(self):
         samples = json.loads(Path(__file__).with_name('v170_panel_heating_fixtures.json').read_text())
         for sample in samples['observations']:

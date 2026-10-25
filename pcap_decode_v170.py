@@ -132,7 +132,7 @@ def decode_fields(f):
             except ValueError:
                 result['invalid_clock_hex'] = b.hex()
         for address, name in [(0x1f, 'pending_alarm_mask'), (0x27, 'acknowledged_alarm_mask'),
-                (0x2d5, 'compressor_frequency_raw'), (0x313, 'compressor_output_w'),
+                (0x2e9, 'compressor_frequency_raw'), (0x313, 'compressor_output_w'),
                 (0x317, 'additional_power_w'), (0x319, 'total_output_w'), (0x321, 'compressor_input_w')]:
             if (b := f.read(address, 2)) is not None:
                 result[name] = int.from_bytes(b, 'little')

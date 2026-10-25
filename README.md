@@ -22,6 +22,8 @@ register schema, generic decoding/writing and systematic capture analysis.
 - Heating and hot-water climate entities, temperatures, powers and cumulative counters.
 - Protocol 170 decodes fields by bank and byte address, including short and overlapping replies.
   Truncated fields and replies from another pump are not combined with old buffer contents.
+- Actual compressor frequency uses panel-checked register `01:02e9`; the old
+  `01:02d5` could retain a heating request during hot water production or a stop.
 - Optional `comfortzone-protocol170.yaml`: ventilation Low/Normal/High, heating curve,
   start/stop extra-hot-water buttons, eleven additional sensors, pump clock and write result.
 - A single asynchronous write at a time: up to 15 seconds waiting for a safe bus gap,

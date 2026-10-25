@@ -10,6 +10,13 @@ motexempel mot att bara ta maxvärdet. Se [PROTOKOLL-170.md](PROTOKOLL-170.md).
 Nästa belägg är panelens driftläge vid en övergång; registerkartan och
 protokollmotorns migrering är ännu inte implementerade.
 
+Senare samma kväll: panelbekräftad husvärme och ett kontrollerat test av Extra
+varmvatten gav både uppvarvning och noll frekvens/effekt efter nedvarvning.
+Frekvensavkodningen är nu rättad från 01:02d5 till 01:02e9 med fångade
+regressionstestfall. Extrafunktionen stängdes av på panelen. Statusbitar för
+begäran och faktisk drift måste fortfarande särskiljas innan CoP-fördelningen
+kan aktiveras; det gäller särskilt 0x2E och stoppfallet 0x1E.
+
 ## Mål och utgångsläge
 
 Nya vanliga värden ska kunna läggas till som registerdefinitioner, utan en
