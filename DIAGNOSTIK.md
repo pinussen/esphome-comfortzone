@@ -707,9 +707,9 @@ De ärvda servicemenynamnen har ännu inte alla jämförts med panelen.
 **Värmebörvärdet var redan 29,1 °C före nya skrivningar.** Flera korta `00:029d`
 och långa `00:0214` svar visar samma bytes `23 01` på `00:02a6`. Ingen ny
 värmeskrivning gjordes och ingen automatisk återställning till tidigare 32 °C.
-Det kan vara ett beräknat börvärde eller en ändring utanför denna undersökning;
-användarens panel/reglerläge behöver jämföras. Äldre lyckade ACK/återläsningar
-visar att registret är skrivbart, inte att ändringen alltid är beständig.
+**Senare bekräftelse från användaren:** 29,1 °C valdes avsiktligt från HA.
+Därmed är ändringen förklarad och återläsningarna bekräftar HA-skrivningen;
+den tidigare misstanken om automatisk ändring är avförd.
 
 ### Skrivprov med oförändrade värden
 
@@ -777,3 +777,16 @@ Efterkontrollen bekräftade kurvgräns 1–10 i API:t, kurva 5, fläkt Low,
 VV 53,1 °C, pumpklocka och uptime 91.8 s. Safe mode
 markerade uppstarten som lyckad; inga CRC-fel sågs. Kontrollskript, logg,
 firmware och SHA256 finns i `/home/bjwl/comfortzone-release-2026-10-25/`.
+
+## HA-installation verifierad från publicerade källor
+
+Användaren bekräftade att sänkningen från 32 till 29,1 °C gjordes avsiktligt i HA.
+Det är därmed ingen indikation på att pumpen själv återställde värdet.
+
+`comfortzone-ha.yaml.example` provbyggdes med ESPHome 2026.10.0 och ESP-IDF 5.5.6
+från en separat katalog. Både paket och extern komponent klonades från GitHub,
+gren `feature/ex50-register-controls`; ingen lokal bibliotekskopia användes.
+Testet använde tillfälliga testuppgifter för autentisering och laddades inte upp.
+Bygget lyckades, inklusive FastCRC: 49 132 byte RAM och 811 195 byte flash.
+Logg: `/tmp/cz-ha-github-build.log`. I HA ska de befintliga `!secret`-värdena
+behållas. Exemplet väljer TX26/RX16/DE21 och inkluderar de nya 170-entiteterna.

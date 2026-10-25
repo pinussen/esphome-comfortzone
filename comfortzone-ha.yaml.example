@@ -1,0 +1,56 @@
+# Copy into HA as comfortzone.yaml; keep your existing secrets.yaml.
+substitutions:
+  tx_pin: "26"
+  rx_pin: "16"
+  re_de_pin: "21"
+  comfortzone_protocol_version: "170"
+  git_branch: "feature/ex50-register-controls"
+
+packages:
+  comfortzone_package: github://pinussen/esphome-comfortzone/comfortzone-package.yaml@feature/ex50-register-controls
+  protocol170: github://pinussen/esphome-comfortzone/comfortzone-protocol170.yaml@feature/ex50-register-controls
+
+esphome:
+  name: comfortzone
+
+esp32:
+  board: wemos_d1_mini32
+  framework:
+    type: esp-idf
+
+safe_mode:
+  num_attempts: 30
+  reboot_timeout: 120s
+
+logger:
+  level: DEBUG
+  logs:
+    comfortzone: DEBUG
+
+api:
+  encryption:
+    key: !secret api_key
+  custom_services: true
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  power_save_mode: none
+  # Optional: set use_address to the device IP when replacing an old board.
+  # use_address: 192.168.3.179
+
+uart:
+  id: uart_bus
+  rx_full_threshold: 1
+  rx_pin:
+    number: ${rx_pin}
+    mode:
+      input: true
+      pullup: true
+
+comfortzone:
+  detect_idle_break: true

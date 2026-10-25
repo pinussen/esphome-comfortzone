@@ -19,7 +19,7 @@ Menynamn i en senare manual bevisar inte registeradresser för protokoll 170.
 
 | Menyfunktion | Val för fjärrstyrning | Implementation / kvar att verifiera |
 | --- | --- | --- |
-| Värmebörvärde | Hög prioritet för prisstyrning | Befintlig climate. Register `00:02a6` kan skrivas men dess beständighet och samband med reglerläget behöver klarläggas. |
+| Värmebörvärde | Hög prioritet för prisstyrning | Befintlig climate. Register `00:02a6` kan skrivas. Användaren bekräftade att ändringen till 29,1 °C gjordes avsiktligt från HA. |
 | Varmvattentemperatur | Hög prioritet | Climate, `00:0373`, samma avkodade mål som panelens tidigare bekräftade 53,1 °C. |
 | Extra varmvatten | Tillfällig behovsstyrning | Start/stopp-knappar, befintliga bitkommandon `81/41:0017`. Pumpens timer sköter återgången. |
 | Fläktläge | Praktiskt vid frånvaro/forcering | Select Low/Normal/High; `00:03fa`. Lägenas exakta luftflöden beror på injusteringen. |
@@ -71,14 +71,11 @@ De ärvda parameternamnen är inte alla kontrollerade mot pumpens servicemeny.
 Historikens 30 poster och två flyttalsserier är fortsatt offlineanalys, med
 okända koders betydelse tydligt markerad. Se [PROTOKOLL-170.md](PROTOKOLL-170.md).
 
-## Kvarstående viktiga frågor
+## Uppföljning och kvarstående frågor
 
-- Värmeregistret lästes som 32,0 °C direkt efter det tidigare skrivtestet, men
-  återlästes som 29,1 °C i flera CRC-giltiga korta och långa svar vid denna genomgång,
-  **innan någon ny inställningsskrivning**. Biblioteket kallar registret
-  `Heating calculated setting`. Det är inte visat att detta är ett beständigt
-  önskat rumstemperaturvärde i pumpens aktuella reglerläge. Ingen automatisk
-  återställning till 32 °C görs.
+- Uppföljning: användaren bekräftade att 29,1 °C var en avsiktlig sänkning från
+  HA. Den tidigare osäkerheten om att pumpen själv skulle ha ändrat värdet är
+  därmed undanröjd. Återläsningarna stämmer med HA-ändringen.
 - Protokoll 170 saknar verifierad tolkning av flera driftbitar. Driftläge,
   avfrostning, varmvattenprioritet och uppdelad värme/VV-CoP ska inte betraktas
   som fungerande bara för att entiteterna finns i gamla paketet.

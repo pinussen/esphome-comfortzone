@@ -26,14 +26,18 @@ hardware diagnosis, deployment and live write tests.
   was queued. No automatic resend after a missing acknowledgement.
 - Bounded UDP frame/raw-UART diagnostics and offline PCAP analysis.
 
-**Heating semantics still need validation:** register `00:02a6` accepts writes and
-has read back 32 °C, but later reported 29.1 °C without a new write from this
-investigation. The original library calls it “Heating calculated setting”. Do not
-assume it is a persistent desired room temperature in every regulation mode.
+The user confirmed that the change from 32 to 29.1 °C was made deliberately in
+Home Assistant. The later 29.1 °C readbacks therefore confirm that HA control
+worked; they are not evidence of the pump reverting the setting.
 Protocol-170 mode/defrost/priority bits and split heating/hot-water CoP remain
 unverified; their presence in a legacy YAML does not imply working readings.
 
 ## Configuration
+
+A complete HA Device Builder configuration is in
+[comfortzone-ha.yaml.example](comfortzone-ha.yaml.example). Keep the existing
+secrets used by the installed device. The example uses only published GitHub
+packages and components, without a local library checkout.
 
 Tested with ESPHome 2026.10.0, ESP-IDF 5.5.6 and ESP32 `wemos_d1_mini32`.
 The repaired installation uses **TX26, RX16, DE+/RE21**. Pin selection must match

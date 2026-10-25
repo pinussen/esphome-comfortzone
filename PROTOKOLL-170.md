@@ -196,7 +196,7 @@ TE10, pumpklocka, råa larmmasker och fler inställningar kan nu publiceras i HA
 undersökningen den 24 oktober; dessa firmwareändringar är ett senare steg.
 Ärvda parameternamn och menyprioritering finns i [CODE-REVIEW.md](CODE-REVIEW.md).
 
-Värmeregistret `00:02a6` återlästes den 25 oktober som 29,1 °C före nya skrivningar,
-trots tidigare bekräftad registeråterläsning 32,0 °C. Detta lämnar en viktig fråga
-om reglerläge/beräknat börvärde öppen. Register-W/ACK är visat; beständig användar-
-inställning och lämplighet för elprisautomation är inte samma sak och återstår.
+Värmeregistret `00:02a6` återlästes den 25 oktober som 29,1 °C efter tidigare
+32,0 °C. Användaren bekräftade därefter att sänkningen gjordes avsiktligt från HA.
+Detta är alltså en lyckad återläsning av HA-ändringen, inte belägg för en
+spontan ändring eller återställning i pumpen.
