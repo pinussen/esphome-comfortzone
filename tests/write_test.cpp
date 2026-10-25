@@ -1,12 +1,28 @@
 #include "host_bus.h"
 #include "comfortzone_decoder.h"
 #include "frequency_fixture.h"
+#include "status_fixture.h"
+#include "operating_test.h"
 #ifdef TEST_ESPHOME_PROBE
 #include "../components/comfortzone/comfortzone_probe.h"
+#include "../components/comfortzone/comfortzone_energy.h"
 #endif
 
 int main(int argc, char **argv) {
+  test_operating();
 #ifdef TEST_ESPHOME_PROBE
+  {
+    esphome::comfortzone::ObservedPower power;
+    assert(power.sample(NAN,0)==0);
+    assert(power.sample(800,1000)==0); // no backfill before the first valid observation
+    assert(power.sample(800,2000)==800);
+    assert(power.sample(NAN,3000)==0);
+    assert(power.sample(900,4000)==0); // exclude the missing interval
+    assert(power.sample(900,5000)==900);
+    assert(power.sample(900,10000)==0); // scheduler gap
+    assert(power.sample(900,11000)==900);
+    assert(power.sample(-1,12000)==0);
+  }
   {
     const std::array<uint8_t,23> captured_read = {0x65,0x6f,0xde,2,0xd3,0x5e,0x41,0x44,0x44,0x52,
       0x17,0x52,1,2,3,4,0x0b,8,0,0xa6,2,2,0x3f};

@@ -388,3 +388,85 @@ Firmware byggd 19:28:00 +0100 installerades via OTA på 192.168.3.179.
 Kortet rapporterade bibliotek `3a7bf47ccce4`, ökande ramräknare utan CRC-fel
 och lyckad uppstart. Lokalt verifieringsunderlag och firmware sparas i
 `/home/bjwl/comfortzone-schema-release-20261025-1930/`.
+
+## Driftläge och fördelad effekt, 2026-10-25 kväll
+
+Statusblocket `01:0017..001b` kopplas nu till en komplett effektavläsning.
+`28 2A 00 00 10` betyder husvärme i paneltestet; `2B/28 2E 00 00 10`
+betyder varmvatten även efter att extra varmvatten stängts av. Den äldre
+1.80-kodens namn för kombinerat läge var missvisande: den aktiverar bara
+varmvattenflaggan. Ingen 50/50-fördelning används.
+
+Profilen `28 2C 00 00 10` stöds av äldre fångst och 1.80-koden men saknar
+oberoende panelbekräftelse för just dessa bytes. Den tas med som varmvatten
+med den begränsningen dokumenterad. `28 08 00 00 10` blir idle endast när
+hela effektavläsningen är noll. `AE`, `BE` och `1E` förblir okända driftlägen.
+Noll faktisk frekvens och noll i samtliga effektfält ger stopped och noll
+fördelad effekt; det identifierar inte avfrostning.
+
+Status ska följas av en komplett effektavläsning inom två sekunder. Båda
+måste vara högst 15 sekunder gamla. Ändrad status ogiltigförklarar tidigare
+parning. Detta kontrolleras varje sekund även när ingen trafik kommer in.
+Binära produktionsflaggor blir ogiltiga vid okänd produktion, inte falskt av.
+När tillskott är aktivt avstår vi fortfarande från effektfördelning och CoP.
+CoP beräknas från pumpens egna effektvärden och är inte en separat mätning.
+
+De fördelade dygnsenergierna använder interna, sekundvisa integrationsvärden.
+Okända intervall och schemaläggningsluckor över två sekunder utelämnas;
+första giltiga provet efter en lucka fyller inte igen luckan bakåt. Offentliga
+effektsensorer behåller NaN när underlag saknas. Dygnssummorna är därför
+summerad observerad energi, inte en uppskattning av saknade intervall.
+Detta hindrar ESPHomes `total_daily_energy` från att räkna nästa giltiga effekt
+över ett helt NaN-gap. Vanliga totalenergisensorn ändras inte i denna etapp.
+
+Reproducerbar råanalys, utan tilldelning av driftlägen:
+
+```sh
+python3 status_timeline_v170.py /path/to/capture.pcap > status-timeline.csv
+```
+
+CSV visar råstatus, ålder, parning, faktisk frekvens, alla effektfält och båda
+ursprungsramarna. Protokoll, avsändare, bank, CRC och hela fält kontrolleras.
+Den nya passiva fångsten
+`/home/bjwl/comfortzone-status-analysis-20261025-193804/` innehåller 765 ramar
+och 23 kompletta effektavläsningar, samtliga med senast sedd profil 282a000010.
+16 har status inom två sekunder. Det visar också varför UDP-fångsten inte får
+antas innehålla varje bussram. Inga inställningar ändrades under fångsten.
+
+Verifierat i denna etapp:
+
+- 16 Python-tester passerar. Hosttester med ASan/UBSan passerar inklusive
+  2 440 återspelade ramar, fångade driftprofiler och skydd mot energiintegration
+  över okända intervall. Versionerna 160, 180 och 221 passerar också vardera
+  200 registeradresser × 234 svarslängder.
+- Full konfiguration och climate-only-konfiguration bygger med ESPHome
+  2026.10.0 / ESP-IDF 5.5.6 utan kompilatorvarningar. Full firmware använder
+  818 155 byte flash och 49 420 byte statiskt RAM.
+- OTA till 192.168.3.179 lyckades. Firmware byggd 19:52:25 +0100 rapporterar
+  bibliotek `7d4363305be0`. Efterkontrollen såg godkänd uppstart, uptime över
+  90 sekunder och ökande ramräknare med 0 CRC-fel. Pumpbörvärdena 29,1/53,1 °C,
+  kurva 5 och Low var oförändrade.
+- Första 85-sekunderskontrollen gav 50 samstämmiga prov i husvärmeläge:
+  cirka 752–756 W till värme, 0 W till varmvatten och värme-CoP cirka 3,0.
+  Övriga 35 prov var okända. En separat 60-sekunders råfångst visar bara fyra
+  kompletta effektavläsningar, varav tre hade status inom två sekunder;
+  mellan två effektavläsningar var luckan drygt 32 sekunder. UDP-fångsten
+  ensam bevisar inte om ramar saknas på bussen, i mottagningen eller i UDP.
+  Okänt driftläge under dessa luckor är därför kvar som en uttrycklig begränsning.
+- Fördelad värmeenergi ökade till cirka 10,28 Wh i första kontrollen medan
+  varmvattenenergin förblev 0. Uppföljningen kontrollerar även API:s
+  `missing_state` för binära produktionsflaggor.
+
+Firmware och kontrollresultat arkiveras lokalt i
+`/home/bjwl/comfortzone-operating-release-20261025-195412/` och efterföljande
+`comfortzone-operating-release-*`. Den första kontrollens binära booleanvärden
+ignorerar API-fältet missing_state; använd den efterföljande kontrollen för
+okända binära tillstånd. Råfångst och CSV ligger i
+`/home/bjwl/comfortzone-operating-postota-20261025-1956/`.
+Detta är en kort funktionskontroll, inte ett långtidstest av stabilitet.
+
+Slutkontrollen i `/home/bjwl/comfortzone-operating-release-20261025-195646` passerade även med korrekt
+hantering av API:s missing_state: 63 samstämmiga husvärmeprov av 85,
+och båda produktionsflaggorna ogiltiga vid okänt läge. Noll CRC-fel under
+kontrollen. Senaste uptime var 253 sekunder. Även bygg-, OTA- och hosttestloggar
+finns i detta arkiv.

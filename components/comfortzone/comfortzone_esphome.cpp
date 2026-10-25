@@ -575,7 +575,13 @@ namespace esphome::comfortzone
       finish_write();
     }
 
-#ifdef USE_SENSOR
+#if HP_PROTOCOL == HP_PROTOCOL_1_7
+    // Also expire derived values during complete bus silence.
+    if (now - last_operating_update_ >= 1000) {
+      last_operating_update_ = now;
+      publish_operating_170_(now);
+    }
+#elif defined(USE_SENSOR)
     // Derive from library state, independently of optional HA sensor entities.
     if (frame == comfortzone_heatpump::PFT_REPLY) {
       const auto &s = heatpump_->comfortzone_status;
@@ -649,6 +655,37 @@ namespace esphome::comfortzone
       return;
     }
   }
+
+#if HP_PROTOCOL == HP_PROTOCOL_1_7
+  void ComfortzoneComponent::publish_operating_170_(uint32_t now) {
+    const auto result = heatpump_->operating_170(now);
+#ifdef USE_SENSOR
+    publish_derived_state(heatpump_current_compressor_heating_input_power_, result.heating_input);
+    publish_derived_state(heatpump_current_compressor_water_input_power_, result.water_input);
+    publish_derived_state(heating_cop_, result.heating_cop);
+    publish_derived_state(water_cop_, result.water_cop);
+#endif
+#ifdef USE_TEXT_SENSOR
+    const char *mode = result.mode == CZMD_ROOM_HEATING ? "heating" :
+                       result.mode == CZMD_HOT_WATER ? "hot_water" :
+                       result.mode == CZMD_IDLE ? "idle" : "unknown";
+    const char *activity = result.activity == CZCMP_RUNNING ? "running" :
+                           result.activity == CZCMP_STOPPED ? "stopped" : "unknown";
+    if (mode_ && (!mode_->has_state() || mode_->state != mode)) mode_->publish_state(mode);
+    if (compressor_activity_ && (!compressor_activity_->has_state() || compressor_activity_->state != activity))
+      compressor_activity_->publish_state(activity);
+#endif
+#ifdef USE_BINARY_SENSOR
+    auto publish = [](binary_sensor::BinarySensor *sensor, bool known, bool value) {
+      if (!sensor) return;
+      if (known) sensor->publish_state(value);
+      else if (sensor->has_state()) sensor->invalidate_state();
+    };
+    publish(room_heating_in_progress_, result.production_known, result.mode == CZMD_ROOM_HEATING);
+    publish(hot_water_production_, result.production_known, result.mode == CZMD_HOT_WATER);
+#endif
+  }
+#endif
 
   void ComfortzoneComponent::dump_config()
   {

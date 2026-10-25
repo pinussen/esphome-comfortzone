@@ -105,12 +105,32 @@ sensor:
   - platform: total_daily_energy
     name: "Total Daily Input Energy"
     power_id: current_compressor_input_power
+  # Only observed intervals contribute to the per-use totals. Unknown power
+  # stays unavailable in HA; these internal sources exclude missing intervals.
+  - platform: template
+    id: observed_heating_power
+    internal: true
+    unit_of_measurement: W
+    update_interval: 1s
+    lambda: |-
+      static esphome::comfortzone::ObservedPower observed;
+      return observed.sample(id(current_compressor_heating_input_power).state, esphome::millis());
+  - platform: template
+    id: observed_water_power
+    internal: true
+    unit_of_measurement: W
+    update_interval: 1s
+    lambda: |-
+      static esphome::comfortzone::ObservedPower observed;
+      return observed.sample(id(current_compressor_water_input_power).state, esphome::millis());
   - platform: total_daily_energy
     name: "Total Daily Heating Input Energy"
-    power_id: current_compressor_heating_input_power
+    power_id: observed_heating_power
+    method: right
   - platform: total_daily_energy
     name: "Total Daily Water Input Energy"
-    power_id: current_compressor_water_input_power
+    power_id: observed_water_power
+    method: right
 
 binary_sensor:
   - platform: comfortzone

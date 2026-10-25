@@ -25,6 +25,18 @@ skrivningar och experimentella format är fortsatt separata. Tabellen skiljer
 ärvda tolkningar från fångstbelägg och panelobservationer; migreringen tillför
 inte nya verifierade registerbetydelser.
 
+Nästa etapp: observerade normallägen för husvärme och varmvatten har fått
+avkodning med färskhetskontroll och fullständiga status-/effektpar. Okända
+övergångar och avfrostning förblir okända. Fördelad effekt och CoP använder
+bara dessa belagda normallägen utan tillskott. Saknade intervall fylls inte
+bakåt i de fördelade dygnsenergierna. `status_timeline_v170.py` och fångade
+statusfixtures ger en reproducerbar grund för nästa analys.
+
+Nästa protokollsteg efter driftverifieringen är att skilja trafiktyper i
+statistiken och kartlägga resterande statusprofiler, särskilt avfrostning och
+tillskott. Därefter prioriteras ännu okända nyttiga läsfält och gemensamma
+versionsprofiler. Fler skrivbara reglage införs först med verifierad återläsning.
+
 ## Mål och utgångsläge
 
 Nya vanliga värden ska kunna läggas till som registerdefinitioner, utan en

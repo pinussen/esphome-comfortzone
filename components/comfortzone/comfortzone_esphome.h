@@ -1,4 +1,5 @@
 #pragma once
+#include "comfortzone_energy.h"
 
 #include <cmath>
 #include <vector>
@@ -173,6 +174,10 @@ class EspHomeRS485Interface;
     ComfortzoneCurveNumber *curve_number_{nullptr};
 #endif
     void finish_write();
+#if HP_PROTOCOL == HP_PROTOCOL_1_7
+    void publish_operating_170_(uint32_t now);
+    uint32_t last_operating_update_{0};
+#endif
     EspHomeRS485Interface *rs485_adapter_{nullptr};
     int rx_idle_pin_{-1};
     int tx_monitor_pin_{-1};
