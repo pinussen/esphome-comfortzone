@@ -535,3 +535,24 @@ hash, bygg-/test-/OTA-loggar och `verification.json` med explicit misslyckad
 klockverifiering. Nästa hårdvarusteg är att undersöka RX-signalen under de
 synbara busspauserna och därefter verifiera ett minutkommando med ACK och ny
 oberoende klockavläsning.
+
+### Nollbytes och vilosignal
+
+Efteranalys av råfångsten `...-202106/raw-trace.pcap` visar flera
+halvsekundersfönster med exempelvis 477 bytes, varav 470 nollor och sju `0x40`.
+Alla 198 GPIO-prov i det fönstret var låga; flera följande fönster visar samma
+mönster. Resultatet finns i `zero-windows.json` i fångstkatalogen. Detta är
+mjukvarutidsstämplar och gles GPIO-sampling, inte en elektrisk vågformsfångst.
+Tracebufferten rapporterade inga förluster, men UDP-sekvensnumren visar 76
+saknade datagram. Råströmmen får därför inte behandlas som komplett eller
+sammanfogas över sekvensluckorna vid ramavkodning.
+
+Observationen är förenlig med en låg eller instabil mottagarsignal under
+viloperioder. Den bevisar varken avsiktliga heartbeat-bytes från pumpen eller
+att bussen är elektriskt ledig. Analog Devices beskriver att MAX485 endast
+garanterar hög mottagarutgång vid öppna ingångar; en terminerad buss utan
+aktiv sändare behöver korrekt bias för ett definierat viloläge:
+[MAX485 och biasmotstånd](https://support.analog.com/en-US/knowledgebase/article/000100964).
+Vår skrivkö kan alltså blockeras av mottagarbeteende även när inga riktiga
+meddelanden sänds. Nästa test behöver skilja detta från aktiv trafik; enbart
+förekomsten av nollbytes ska inte tolkas som bevis för upptagen buss.
