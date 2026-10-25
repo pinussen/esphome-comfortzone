@@ -1,15 +1,14 @@
+substitutions:
+  comfortzone_component_source: github://pinussen/esphome-comfortzone@${git_branch}
+
 esphome:
-  platformio_options:
-    build_flags:
-      - "-O3"
-      - "-DHP_PROTOCOL=${comfortzone_protocol_version}"
-      - "-DUSE_API_USER_DEFINED_ACTIONS"
+  build_flags:
+    - "-DHP_PROTOCOL=${comfortzone_protocol_version}"
+    - "-DUSE_API_USER_DEFINED_ACTIONS"
+    - "-DUSE_ESPHOME"
 
 external_components:
-  - source:
-      type: git
-      url: https://github.com/pinussen/esphome-comfortzone
-      ref: ${git_branch}
+  - source: ${comfortzone_component_source}
     components: [ comfortzone ]
     refresh: 0s
 
@@ -28,6 +27,7 @@ uart:
   data_bits: 8
   parity: NONE
   stop_bits: 1
+  rx_buffer_size: 1024
 
 comfortzone:
   re_de_pin: ${re_de_pin}
@@ -146,7 +146,7 @@ climate:
       name: "ComfortZone EX50 hot water"
       visual:
         min_temperature: 30
-        max_temperature: 65
+        max_temperature: 60
 
 # Needed to keep track of sensor offset changes
 time:

@@ -226,7 +226,6 @@ CONFIG_SCHEMA = cv.Schema(
         cv.Optional(CONF_FAN_SPEED_DUTY): sensor.sensor_schema(
             unit_of_measurement=UNIT_PERCENT,
             icon=ICON_FAN,
-            device_class=DEVICE_CLASS_POWER,
             state_class=STATE_CLASS_MEASUREMENT,
         ),
         cv.Optional(CONF_HOT_WATER_CALCULATED_SETTING): sensor.sensor_schema(
@@ -276,6 +275,26 @@ CONFIG_SCHEMA = cv.Schema(
         ),
     }
 )
+EXTRA_SENSORS = {
+    'sensors_te10_temp': ('°C', 1, 'temperature'),
+    'heating_curve': ('', 0, None),
+    'hot_water_max_runtime': ('min', 0, 'duration'),
+    'hot_water_pause_time': ('min', 0, 'duration'),
+    'hot_water_extra_setting': ('°C', 1, 'temperature'),
+    'hot_water_extra_time': ('min', 0, 'duration'),
+    'normal_fan_speed': ('%', 1, None),
+    'hot_water_compressor_min_frequency': ('Hz', 1, 'frequency'),
+    'hot_water_compressor_max_frequency': ('Hz', 1, 'frequency'),
+    'pending_alarm_mask': ('', 0, None),
+    'acknowledged_alarm_mask': ('', 0, None),
+}
+CONFIG_SCHEMA = CONFIG_SCHEMA.extend({
+    cv.Optional(key): sensor.sensor_schema(**dict(
+        unit_of_measurement=unit, accuracy_decimals=decimals,
+        **({"device_class": device_class} if device_class else {}),
+    )) for key, (unit, decimals, device_class) in EXTRA_SENSORS.items()
+})
+
 SENSORS_INIT = {
     CONF_FAN_TIME_TO_FILTER_CHANGE: "set_fan_time_to_filter_change_sensor",
     CONF_TE0_OUTDOOR_TEMP: "set_te0_outdoor_temp_sensor",
@@ -311,6 +330,7 @@ SENSORS_INIT = {
     CONF_TARGET_FLOW_WATER_TEMPERATURE: "set_target_flow_water_temperature_sensor",
 }
 
+SENSORS_INIT.update({key: "set_"+key+"_sensor" for key in EXTRA_SENSORS})
 
 async def to_code(config):
     hub = await cg.get_variable(config[CONF_COMFORTZONE_ID])

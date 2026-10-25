@@ -1,0 +1,70 @@
+# Local build of the package AND component from this checkout.
+# esphome compile comfortzone-recovery.yaml
+substitutions:
+  tx_pin: "17"
+  rx_pin: "16"
+  re_de_pin: "21"
+  comfortzone_protocol_version: "170"
+  git_branch: "fix/api-service-crash-guard"
+  comfortzone_component_source: components
+
+packages:
+  comfortzone_package: !include comfortzone-package.yaml
+
+esphome:
+  name: comfortzone
+  comment: "Protocol 170; RS485 direction diagnostics and physical RX idle detection"
+  build_path: build/comfortzone-recovery
+
+esp32:
+  board: wemos_d1_mini32
+  framework:
+    type: esp-idf
+
+safe_mode:
+  num_attempts: 30
+  reboot_timeout: 120s
+
+logger:
+  level: DEBUG
+  logs:
+    comfortzone: DEBUG
+
+uart:
+  id: uart_bus
+  rx_full_threshold: 1
+  rx_pin:
+    number: ${rx_pin}
+    mode:
+      input: true
+      pullup: true
+
+debug:
+  update_interval: 30s
+
+comfortzone:
+  detect_idle_break: true
+
+text_sensor:
+  - platform: debug
+    reset_reason:
+      name: "Last restart reason"
+
+sensor:
+  - platform: uptime
+    name: "Uptime"
+    update_interval: 10s
+
+api:
+  encryption:
+    key: !secret api_key
+  custom_services: true
+
+ota:
+  - platform: esphome
+    password: !secret ota_password
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  power_save_mode: none

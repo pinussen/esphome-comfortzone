@@ -1,67 +1,65 @@
-# ComfortZone EX50 component for ESPHome
+# ComfortZone EX50 for ESPHome
 
-This is a custom component for ESPHome that utilizes a decoder library
-[comfortzone_heatpump](https://github.com/qix67/comfortzone_heatpump).
-All the credits for the decoder part go to [@qix67](https://github.com/qix67/).
+ESP32/RS485 integration with asynchronous writes and protocol-170 decoding.
+The protocol library originated with [qix67](https://github.com/qix67/comfortzone_heatpump);
+this project builds the [pinussen fork](https://github.com/pinussen/comfortzone_heatpump).
+The ESPHome integration originated with [vinnyspb](https://github.com/vinnyspb/esphome-comfortzone).
 
-## Hardware
+The current work is on **`feature/ex50-register-controls` in both repositories**.
+Use the same branch for the package and external component. Loading a package
+from one branch and its component from `main` can silently select older code.
 
-Make sure you understand what you are doing and you have all the legally required
-competences and skills. Read the [README](https://github.com/qix67/comfortzone_heatpump/blob/master/README.txt) for the decoder library before wiring things. 
+[CODE-REVIEW.md](CODE-REVIEW.md) covers the code audit, EX50 manual/menu selection,
+new entities and remaining uncertainties. [PROTOKOLL-170.md](PROTOKOLL-170.md)
+documents the captured register evidence. [DIAGNOSTIK.md](DIAGNOSTIK.md) records
+hardware diagnosis, deployment and live write tests.
 
-It can be likely run on almost any ESP32-compatible board with a RS485 module, but I used these:
+## What is supported
 
-- [Wemos S2 mini](https://www.wemos.cc/en/latest/s2/s2_mini.html)
-- [RS485 module](https://www.aliexpress.com/item/32846149743.html)
+- Heating and hot-water climate entities, temperatures, powers and cumulative counters.
+- Protocol 170 decodes fields by bank and byte address, including short and overlapping replies.
+  Truncated fields and replies from another pump are not combined with old buffer contents.
+- Optional `comfortzone-protocol170.yaml`: ventilation Low/Normal/High, heating curve,
+  start/stop extra-hot-water buttons, eleven additional sensors, pump clock and write result.
+- A single asynchronous write at a time. Values are not confirmed merely because a request
+  was queued. No automatic resend after a missing acknowledgement.
+- Bounded UDP frame/raw-UART diagnostics and offline PCAP analysis.
 
-Also tested with [OLIMEX ESP32-C3-DevKit-Lipo](https://www.olimex.com/Products/IoT/ESP32-C3/ESP32-C3-DevKit-Lipo/open-source-hardware).
-
-![image](schematics.jpg)
+**Heating semantics still need validation:** register `00:02a6` accepts writes and
+has read back 32 °C, but later reported 29.1 °C without a new write from this
+investigation. The original library calls it “Heating calculated setting”. Do not
+assume it is a persistent desired room temperature in every regulation mode.
+Protocol-170 mode/defrost/priority bits and split heating/hot-water CoP remain
+unverified; their presence in a legacy YAML does not imply working readings.
 
 ## Configuration
 
-Create a configuration file, e.g. `comfortzone.yaml` with the folowing contents,
-replacing parameters as needed:
+Tested with ESPHome 2026.10.0, ESP-IDF 5.5.6 and ESP32 `wemos_d1_mini32`.
+The repaired installation uses **TX26, RX16, DE+/RE21**. Pin selection must match
+the actual wiring; its former GPIO17 was found stuck high.
+
 ```yaml
 substitutions:
-  # GPIO pin on ESP32 board connected to DI pin on RS485 module
-  tx_pin: "35"
-
-  # GPIO pin on ESP32 board connected to RO pin on RS485 module
-  rx_pin: "36"
-
-  # GPIO pin on ESP32 board connected to both DE and RE pins on RS485 module
-  re_de_pin: "37"
-
-  # ComfortZone protocol version. See supported versions in:
-  # https://github.com/qix67/comfortzone_heatpump/blob/master/comfortzone_config.h#L4-L6
-  comfortzone_protocol_version: "180"
-
-  # git branch to use for the source code, can be changed during development
-  git_branch: "main"
+  tx_pin: "26"
+  rx_pin: "16"
+  re_de_pin: "21"
+  comfortzone_protocol_version: "170"
+  git_branch: "feature/ex50-register-controls"
 
 packages:
-  comfortzone_package: github://pinussen/esphome-comfortzone/comfortzone-package.yaml@${git_branch}
+  comfortzone_package: github://pinussen/esphome-comfortzone/comfortzone-package.yaml@feature/ex50-register-controls
+  protocol170: github://pinussen/esphome-comfortzone/comfortzone-protocol170.yaml@feature/ex50-register-controls
 
 esphome:
-  # Choose a hostname for the ESP32 board on your network
   name: comfortzone
 
 esp32:
-  # Your board type, choose correct one from:
-  # https://docs.platformio.org/en/latest/boards/index.html
-  board: lolin_s2_mini
+  board: wemos_d1_mini32
   framework:
     type: esp-idf
-  # Depending on your board type, you may need more parameters, e.g.
-  # for ESP32-S3 and -C3 based boards, you may need to add:
-  #   platformio_options:
-  #     board_build.flash_mode: dio
 
 logger:
-  # Recommended to keep logging disabled (NONE) for performance reasons.
-  # Enable if required for debugging (DEBUG, INFO, ERROR levels).
-  level: NONE
+  level: INFO
 
 api:
   encryption:
@@ -75,39 +73,61 @@ ota:
 wifi:
   ssid: !secret wifi_ssid
   password: !secret wifi_password
-  power_save_mode: none
 
+uart:
+  id: uart_bus
+  rx_full_threshold: 1
+  rx_pin:
+    number: ${rx_pin}
+    mode:
+      input: true
+      pullup: true
+
+comfortzone:
+  detect_idle_break: true
 ```
 
-Put a `secrets.yaml` file to the same directory which should contain all the necessary credentials:
+`detect_idle_break` is installation-specific and defaults to false. It handles
+this adapter's low RX line and spurious zero bytes between frames using physical
+GPIO edge timing. It is not permission to transmit through arbitrary traffic.
+`controller_address` defaults to `0x45726963` (“Eric”), the address used in the
+successful GPIO26 tests.
 
-```yaml
-api_key: "base64-encoded API encryption key"
-wifi_ssid: "wifi network name"
-wifi_password: "wifi password"
-ota_password: "create a random password for OTA updates through ESPHome"
+For local development, `comfortzone-tx26-test.yaml` includes the recovery and
+protocol-170 packages directly from this checkout and reads `secrets.yaml`.
+`comfortzone-recovery.yaml` alone retains the earlier TX17 diagnostic setup.
+
+```sh
+esphome compile comfortzone-tx26-test.yaml
+esphome upload comfortzone-tx26-test.yaml --device DEVICE_IP
+esphome logs comfortzone-tx26-test.yaml --device DEVICE_IP
 ```
 
-## Build and run
+## Library and builds
 
-```bash
-$ esphome compile comfortzone.yaml
-$ esphome upload comfortzone.yaml
-$ esphome logs comfortzone.yaml
+The compiled C++ library is **vendored**, not fetched from the sibling checkout.
+Its exact source commit and SHA256 hashes are in
+`components/comfortzone/third_party/comfortzone_heatpump.lock.json`.
+The library declares its own pinned FastCRC dependency so native ESP-IDF can
+resolve `FastCRC.h`. ESPHome links the vendor directory directly to avoid stale
+local library copies. `git_commit_hash` is not a library selector in this setup.
+
+```sh
+python3 scripts/sync_library.py --check
+# After committing library changes in the sibling repository:
+python3 scripts/sync_library.py --import-from ../comfortzone_heatpump
 ```
 
-# Services exposed to Home Assistant
+## Verification and protocol work
 
-![image](services.png)
-
-You can find the full list in [the source code declaration](components/comfortzone/comfortzone_esphome.cpp) under comment:
-
-```cpp
-// Services exposed to Home Assistant are declared here
+```sh
+python3 tests/run_host_tests.py --fastcrc /path/to/FastCRC
+python3 tests/run_host_tests.py --fastcrc /path/to/FastCRC --protocol 180
+python3 -m unittest discover -s tests -p 'test_*.py'
+python3 pcap_decode_v170.py capture.pcap --output decoded.json
 ```
 
-## Home Assistant Dashboard
-
-Create an empty dashboard in Home Assistant and copy [YAML config](home-assistant-dashboard/home-assistant-dashboard.yaml)
-into it's raw configuration editor. Put images from the [dashboard folder](home-assistant-dashboard/) into `www` folder
-of Home Assistant.
+The host runner supports protocols 160/170/180/221 and optional PCAP paths.
+It compiles the real C++ decoder with a fake UART/clock under ASan/UBSan.
+Tests and example configs contain no Wi-Fi/API credentials and do not contact a pump.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the two-repository workflow and captures.

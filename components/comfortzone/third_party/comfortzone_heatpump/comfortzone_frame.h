@@ -1161,53 +1161,47 @@ typedef struct __attribute__ ((packed))
 {
 	CZ_PACKET_HEADER cz_head;
 
-	byte unknown[2];
-
-	byte extra_hot_water;						// 0x00 = on, 0xFF = off
-	byte hot_water_user_setting[2];	// °C, LSB, 2 bytes, * 10 (user selection)
-	byte hot_water_hysteresis[2];	// °C, LSB, 2 bytes, * 10
-
-	byte hot_water_normal_steps[STATUS_01_NB_HW_NORMAL_STEPS][2];	// °C, LSB, signed 2 bytes, * 10
-	byte hot_water_high_steps[STATUS_01_NB_HW_HIGH_STEPS][2];	// °C, LSB, signed 2 bytes, * 10
-	byte hot_water_extra_steps[STATUS_01_NB_HW_EXTRA_STEPS][2];	// °C, LSB, signed 2 bytes, * 10
-
-	byte unknown5a[1];
-
-	byte hot_water_max_runtime;							// minute
+	byte hot_water_max_runtime;						// minute
 	byte hot_water_pause_time;						// minute
 
-	byte unknown5b[8][2];				// looks like 8 signed int16
+	byte unknown[16];
 
-	byte hot_water_compressor_min_frequency[2];	// Hz, LSB, 2bytes, * 10
-	byte hot_water_compressor_max_frequency[2];	// Hz, LSB, 2bytes, * 10
+	byte hot_water_compressor_min_frequency[2];		// Hz, LSB, 2bytes, * 10
+	byte hot_water_compressor_max_frequency[2];		// Hz, LSB, 2bytes, * 10
 
+	byte unknown2[4];								// 0x00 = on, 0xFF = off ???
+
+	byte hot_water_extra_setting[2];				// °C, LSB, 2bytes, * 10
+	byte hot_water_extra_time[2];					// minute, LSB, 2bytes
+
+	byte unknown3[3];
+	byte unknown4[2];								//byte condensing_temperature[2];					// °C, LSB, 2 bytes, * 10 ???
+	byte unknown5[6];
+
+	byte normal_fan_speed[2];						// %, LSB, 2 bytes, * 10
 	byte unknown6[2];
-
-	byte hot_water_extra_setting[2];			// °C, LSB, 2bytes, * 10
-	byte hot_water_extra_time[2];			// minute, LSB, 2bytes
-
-	byte unknown7[26];
-
-	byte normal_fan_speed[2];					// %, LSB, 2 bytes, * 10
-	byte reduce_fan_speed[2];					// %, LSB, 2 bytes, * 10, signed
-	byte fan_boost_increase[2];		// %, LSB, 2 bytes, * 10
-
-	byte unknown8[26];
-
-	byte supply_fan_t12_adjust[2];	// %, LSB, 2 bytes, * 10
-
-	byte unknown8a[6];
+	//byte reduce_fan_speed[2];						// %, LSB, 2 bytes, * 10, signed
+	//byte fan_boost_increase[2];					// %, LSB, 2 bytes, * 10
+    byte unknown7[26];
 
 	byte fan_time_to_filter_change[2];	// days, LSB, 2 bytes
-
-	byte unknown9[6];
-
-	byte heating_compressor_min_frequency[2];	// Hz, LSB, 2 bytes, * 10
-	byte heating_compressor_max_frequency[2];	// Hz, LSB, 2 bytes, * 10
-	byte unknown9a[1];
+    byte unknown8[26];
 
 	byte crc;
 } R_REPLY_STATUS_V170_X79;
+static_assert(sizeof(R_REPLY_STATUS_V170_X79) == 0x79, "Protocol 170 settings frame must be 121 bytes");
+
+// Register 00 20 03: protocol 170 has a 193-byte settings snapshot.
+// HW setting at frame offsets 104-105 was confirmed against the pump panel.
+typedef struct __attribute__ ((packed))
+{
+    CZ_PACKET_HEADER cz_head;
+    byte unknown[83];
+    byte hot_water_user_setting[2]; // tenths of degrees C, little endian
+    byte unknown1[86];
+    byte crc;
+} R_REPLY_STATUS_V170_SETTINGS;
+static_assert(sizeof(R_REPLY_STATUS_V170_SETTINGS) == 193, "Protocol 170 settings layout mismatch");
 
 typedef struct __attribute__ ((packed)) // 00 9d 02  02 06 00 00 ff 00 00 ff 06 d1 00 14 00 32 00 ce ff 00 00 07 00 00 00 fe
 {

@@ -3,3 +3,8 @@
 .vscode
 .DS_Store
 __pycache__
+comfortzone-bjwl.yaml
+
+.venv/
+.platformio/
+build/

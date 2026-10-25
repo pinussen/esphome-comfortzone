@@ -1,0 +1,50 @@
+# Optional EX50 / protocol 170 entities. Include alongside comfortzone-package.yaml.
+# Register evidence and limitations: CODE-REVIEW.md and PROTOKOLL-170.md.
+sensor:
+  - platform: comfortzone
+    sensors_te10_temp:
+      name: "TE10 temperature"
+      disabled_by_default: true
+    heating_curve:
+      name: "Heating curve readback"
+    hot_water_max_runtime:
+      name: "Hot water maximum runtime"
+    hot_water_pause_time:
+      name: "Hot water pause time"
+    hot_water_extra_setting:
+      name: "Extra hot water target"
+    hot_water_extra_time:
+      name: "Extra hot water duration"
+    normal_fan_speed:
+      name: "Normal fan speed setting"
+    hot_water_compressor_min_frequency:
+      name: "Hot water minimum compressor frequency"
+    hot_water_compressor_max_frequency:
+      name: "Hot water maximum compressor frequency"
+    pending_alarm_mask:
+      name: "Pending alarm mask"
+      entity_category: diagnostic
+    acknowledged_alarm_mask:
+      name: "Acknowledged alarm mask"
+      entity_category: diagnostic
+text_sensor:
+  - platform: comfortzone
+    pump_datetime:
+      name: "Pump clock"
+      entity_category: diagnostic
+    last_write_result:
+      name: "Last pump write result"
+      entity_category: diagnostic
+select:
+  - platform: comfortzone
+    name: "Ventilation mode"
+number:
+  - platform: comfortzone
+    name: "Heating curve"
+button:
+  - platform: comfortzone
+    name: "Start extra hot water"
+    enable: true
+  - platform: comfortzone
+    name: "Stop extra hot water"
+    enable: false

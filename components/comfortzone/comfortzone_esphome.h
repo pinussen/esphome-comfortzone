@@ -2,7 +2,6 @@
 
 #include <cmath>
 #include <vector>
-#include <chrono>
 
 #include "esphome/core/component.h"
 #include "esphome/components/socket/socket.h"
@@ -26,11 +25,13 @@
 #include "esphome/components/text_sensor/text_sensor.h"
 #endif
 
-class comfortzone_heatpump;
+#include "comfortzone_heatpump.h"
+#include "comfortzone_controls.h"
 
 namespace esphome::comfortzone
 {
 class ComfortzoneComponent;
+class EspHomeRS485Interface;
 #ifdef USE_CLIMATE
   class ComfortzoneHeatpumpClimate : public climate::Climate
   {
@@ -65,8 +66,28 @@ class ComfortzoneComponent;
 
     void set_te3_offset_global(globals::RestoringGlobalsComponent<float> *te3_offset);
     void set_re_de_pin(GPIOPin *re_de_pin);
+    void set_rx_idle_pin(int pin) { rx_idle_pin_ = pin; }
+    void set_tx_monitor_pin(int pin) { tx_monitor_pin_ = pin; }
+    void set_controller_address(uint32_t address) { controller_address_ = address; }
 
+#ifdef USE_SELECT
+    void set_fan_select(ComfortzoneFanSelect *entity) { fan_select_ = entity; entity->set_parent(this); }
+#endif
+#ifdef USE_NUMBER
+    void set_curve_number(ComfortzoneCurveNumber *entity) { curve_number_ = entity; entity->set_parent(this); }
+#endif
 #ifdef USE_SENSOR
+    void set_sensors_te10_temp_sensor(sensor::Sensor *value) { sensors_te10_temp_ = value; }
+    void set_heating_curve_sensor(sensor::Sensor *value) { heating_curve_ = value; }
+    void set_hot_water_max_runtime_sensor(sensor::Sensor *value) { hot_water_max_runtime_ = value; }
+    void set_hot_water_pause_time_sensor(sensor::Sensor *value) { hot_water_pause_time_ = value; }
+    void set_hot_water_extra_setting_sensor(sensor::Sensor *value) { hot_water_extra_setting_ = value; }
+    void set_hot_water_extra_time_sensor(sensor::Sensor *value) { hot_water_extra_time_ = value; }
+    void set_normal_fan_speed_sensor(sensor::Sensor *value) { normal_fan_speed_ = value; }
+    void set_hot_water_compressor_min_frequency_sensor(sensor::Sensor *value) { hot_water_compressor_min_frequency_ = value; }
+    void set_hot_water_compressor_max_frequency_sensor(sensor::Sensor *value) { hot_water_compressor_max_frequency_ = value; }
+    void set_pending_alarm_mask_sensor(sensor::Sensor *value) { pending_alarm_mask_ = value; }
+    void set_acknowledged_alarm_mask_sensor(sensor::Sensor *value) { acknowledged_alarm_mask_ = value; }
     void set_fan_time_to_filter_change_sensor(sensor::Sensor *fan_time_to_filter_change);
     void set_te0_outdoor_temp_sensor(sensor::Sensor *sensors_te0_outdoor_temp);
     void set_te1_flow_water_sensor(sensor::Sensor *sensors_te1_flow_water);
@@ -111,6 +132,8 @@ class ComfortzoneComponent;
 #endif
 
 #ifdef USE_TEXT_SENSOR
+    void set_pump_datetime_sensor(text_sensor::TextSensor *value) { pump_datetime_ = value; }
+    void set_last_write_result_sensor(text_sensor::TextSensor *value) { last_write_result_ = value; }
     void set_compressor_activity_sensor(text_sensor::TextSensor *compressor_activity);
     void set_mode_sensor(text_sensor::TextSensor *mode);
     void set_fan_speed_sensor(text_sensor::TextSensor *fan_speed);
@@ -122,11 +145,16 @@ class ComfortzoneComponent;
     void set_water_heater_climate(ComfortzoneWaterHeaterClimate *water_heater_climate);
 #endif
     comfortzone_heatpump *get_heatpump() const;
+    bool request_write(comfortzone_heatpump::WriteKind kind, float value, uint16_t sensor = 0);
 
     void dump_config() override;
 
 #ifdef USE_API
     void debug_reroute(std::string ip, float port, float timeout);
+    void debug_uart(std::string ip, float port, float timeout, float rx_pin);
+    void debug_direction();
+    void debug_read_probe(float requested_mode);
+    void debug_tx_pad();
     void set_sensor_offset(float sensor_num, float temp_offset); // sensor: [0:7], offset in °C (-10.0° -> 10.0°)
     void override_indoor_temperature(float temp);
     void enable_fireplace_mode();
@@ -135,8 +163,32 @@ class ComfortzoneComponent;
 
     void setup() override;
     void loop() override;
+    void on_shutdown() override;
 
   private:
+#ifdef USE_SELECT
+    ComfortzoneFanSelect *fan_select_{nullptr};
+#endif
+#ifdef USE_NUMBER
+    ComfortzoneCurveNumber *curve_number_{nullptr};
+#endif
+    void finish_write();
+    EspHomeRS485Interface *rs485_adapter_{nullptr};
+    int rx_idle_pin_{-1};
+    int tx_monitor_pin_{-1};
+    uint8_t probe_phase_{0}; // 0=idle, 1=waiting, 2=DE preamble, 3=receiving
+    int probe_mode_{0};
+    uint32_t probe_started_{0};
+    uint32_t probe_phase_started_{0};
+    void poll_read_probe_();
+    uint32_t controller_address_{0x45726963};
+    bool raw_uart_debug_{false};
+    bool direction_active_{false};
+    bool direction_settled_{false};
+    uint32_t direction_started_{0};
+    uint32_t direction_rx_start_{0};
+    uint32_t direction_low_samples_{0};
+    uint32_t direction_high_samples_{0};
     void disable_debugging();
     void forward_to_udp();
     void set_fireplace_mode(bool enable);
@@ -146,6 +198,17 @@ class ComfortzoneComponent;
     GPIOPin *re_de_pin_{nullptr};
 
 #ifdef USE_SENSOR
+    sensor::Sensor *sensors_te10_temp_{nullptr};
+    sensor::Sensor *heating_curve_{nullptr};
+    sensor::Sensor *hot_water_max_runtime_{nullptr};
+    sensor::Sensor *hot_water_pause_time_{nullptr};
+    sensor::Sensor *hot_water_extra_setting_{nullptr};
+    sensor::Sensor *hot_water_extra_time_{nullptr};
+    sensor::Sensor *normal_fan_speed_{nullptr};
+    sensor::Sensor *hot_water_compressor_min_frequency_{nullptr};
+    sensor::Sensor *hot_water_compressor_max_frequency_{nullptr};
+    sensor::Sensor *pending_alarm_mask_{nullptr};
+    sensor::Sensor *acknowledged_alarm_mask_{nullptr};
     sensor::Sensor *fan_time_to_filter_change_{nullptr};   // days (proto: 1.60, 1.80)
     sensor::Sensor *sensors_te0_outdoor_temp_{nullptr};    // °C, * 10 (proto: 1.60, 1.80)
     sensor::Sensor *sensors_te1_flow_water_{nullptr};      // °C, * 10 (proto: 1.60, 1.80)
@@ -204,6 +267,9 @@ class ComfortzoneComponent;
 #endif
 
 #ifdef USE_TEXT_SENSOR
+    text_sensor::TextSensor *pump_datetime_{nullptr};
+    text_sensor::TextSensor *last_write_result_{nullptr};
+    int last_clock_second_{-1};
     text_sensor::TextSensor *compressor_activity_{nullptr}; // (proto: 1.60, 1.80)
     text_sensor::TextSensor *mode_{nullptr};                // (proto: 1.60, 1.80)
 
@@ -221,14 +287,24 @@ class ComfortzoneComponent;
     // for debugging purposes
     uint8_t *grab_buffer_ = new uint8_t[256];
     uint16_t grab_frame_size_ = 0;
-    std::chrono::system_clock::time_point debug_until_ = {};
+    uint32_t debug_started_ms_{0};
+    uint32_t debug_duration_ms_{0};
+    uint32_t last_trace_flush_{0};
     struct sockaddr_in src_addr_;
     struct sockaddr_in dest_addr_;
     std::unique_ptr<socket::Socket> sock_ = nullptr;
 
-    comfortzone_heatpump *heatpump_;
-    bool power_changed_ = false;
+    comfortzone_heatpump *heatpump_{nullptr};
+    bool pending_write_{false};
+    bool pending_offset_override_{false};
+    comfortzone_heatpump::WriteKind pending_write_kind_{comfortzone_heatpump::WriteKind::ROOM_TEMPERATURE};
+    float pending_write_value_{0};
+    uint32_t received_frames_{0};
+    uint32_t corrupted_frames_{0};
+    uint32_t unknown_frames_{0};
+    uint32_t last_bus_report_{0};
 
-    std::chrono::system_clock::time_point last_indoor_temperature_override_ = {};
+    uint32_t last_indoor_temperature_override_{0};
+    bool has_indoor_override_{false};
   };
 }

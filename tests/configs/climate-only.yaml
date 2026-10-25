@@ -1,0 +1,36 @@
+esphome:
+  name: comfortzone-climate-test
+  build_flags:
+    - -DHP_PROTOCOL=170
+    - -DUSE_ESPHOME
+esp32:
+  board: wemos_d1_mini32
+  framework:
+    type: esp-idf
+external_components:
+  - source: ../../components
+    components: [comfortzone]
+logger:
+api:
+  custom_services: true
+wifi:
+  ssid: test-network
+  password: test-password
+globals:
+  - id: te3_offset
+    type: float
+    restore_value: true
+    initial_value: '0.0'
+uart:
+  tx_pin: 26
+  rx_pin: 16
+  baud_rate: 19200
+comfortzone:
+  re_de_pin: 21
+  te3_offset_global_id: te3_offset
+climate:
+  - platform: comfortzone
+    heatpump_climate:
+      name: Heating
+    water_heater_climate:
+      name: Hot water

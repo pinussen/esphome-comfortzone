@@ -1,0 +1,10 @@
+# GPIO26 is on the user's populated inner header row.
+# Move the MAX485 DI connection from GPIO17 to GPIO26 before connecting the pump.
+packages:
+  recovery: !include comfortzone-recovery.yaml
+  protocol170: !include comfortzone-protocol170.yaml
+substitutions:
+  tx_pin: "26"
+esphome:
+  build_path: build/comfortzone-tx26-test
+  comment: "TX=GPIO26, RX=GPIO16, DE=GPIO21; inner header row"
