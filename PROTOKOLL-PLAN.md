@@ -225,3 +225,22 @@ avfrostning/tillskott, samt panelkontroll vid eldstadsläge och varmvattenpriori
 Nuvarande stoppfall `20 08 00 00 10` har noll komplett effekt men inget oberoende
 panelnamn och ska därför inte ges en ny mode-etikett på chans. De senaste
 ändringarna är en etapp, inte en komplett protokollspecifikation.
+
+### Passiv etapp 2026-10-26 kväll
+
+Dygnsinsamling startad 22:23, utan registerskrivningar eller ny OTA. Samlar
+API-/uptimehändelser, tidssynkens resultat och råramar med återanslutning.
+Avslut planerat 2026-10-27 22:23; resultatet är inte klart vid denna notering.
+Driftövergångar och nattens synk bedöms först mot den färdiga fångsten.
+
+30 arkivfångster har inventerats. Marsfilerna överskrider den teoretiska
+19200-busskapaciteten med faktor 2,19–2,42 räknat på giltiga rambytes och
+PCAP-tid. Tidigare upprepnings- och intervallobservationer måste därför skiljas
+från påståenden om fysisk trafik. Ingen automatisk deduplicering införs.
+Se [PASSIV-INSAMLING.md](PASSIV-INSAMLING.md) för evidens, kommandon och nästa steg.
+
+HA-metadata rättade för tiondels hertz och filternedräkning. Kodgranskningen
+identifierar generell färskhet hos övriga givare och ACK kontra oberoende
+återläsning som kvarvarande arbete. 35 Python-tester, 23529 återspelade ramar
+under ASan/UBSan och ESPHome-bygget passerar. Metadataändringarna väntar på
+nästa installation så att dygnsinsamlingsperioden får oförändrad firmware.

@@ -72,7 +72,7 @@ CONFIG_SCHEMA = cv.Schema(
             unit_of_measurement=UNIT_DAY,
             icon=ICON_FAN,
             device_class=DEVICE_CLASS_DURATION,
-            state_class=STATE_CLASS_TOTAL,
+            state_class=STATE_CLASS_MEASUREMENT,
         ),
         cv.Optional(CONF_TE0_OUTDOOR_TEMP): sensor.sensor_schema(
             unit_of_measurement=UNIT_CELSIUS,
@@ -139,6 +139,7 @@ CONFIG_SCHEMA = cv.Schema(
         ),
         cv.Optional(CONF_CURRENT_COMPRESSOR_FREQUENCY): sensor.sensor_schema(
             unit_of_measurement=UNIT_HERTZ,
+            accuracy_decimals=1,
             icon=ICON_POWER,
             device_class=DEVICE_CLASS_FREQUENCY,
             state_class=STATE_CLASS_MEASUREMENT,

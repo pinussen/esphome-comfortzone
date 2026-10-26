@@ -3,6 +3,8 @@
 Denna genomgång beskriver första etappen. Senare verifieringar, eldstadsknappar,
 tidssynk, driftprofiler och energiändringar finns daterade i
 [PROTOKOLL-170.md](PROTOKOLL-170.md) och [PROTOKOLL-PLAN.md](PROTOKOLL-PLAN.md).
+Den passiva granskningen 2026-10-26, inklusive återstående färskhetsproblem
+och begränsningar hos äldre fångster, finns i [PASSIV-INSAMLING.md](PASSIV-INSAMLING.md).
 
 ## Två repon
 

@@ -223,6 +223,13 @@ register addresses, scalar-schema coverage and changing bytes. It keeps devices
 and banks separate and does not name undocumented values. The latest findings,
 including a cross-version hot-water-priority candidate, are in PROTOKOLL-170.md.
 
+`traffic_report_v170.py capture.pcap --output traffic.json` summarizes unchanged
+replies, receipt intervals, capture gaps and raw status transitions. Historical
+captures can contain more bytes than fit on the serial bus in their timestamped
+duration; do not treat their UDP packet rate as the physical polling rate.
+[PASSIV-INSAMLING.md](PASSIV-INSAMLING.md) documents the bounded, reconnecting
+24-hour collector, its local output and the archive comparison.
+
 Protocol 170 measured input power now expires after 15 seconds without a complete
 power snapshot. All three daily input-energy integrators exclude unknown periods;
 they report observed energy and do not estimate energy lost during outages.
