@@ -1,0 +1,30 @@
+{
+  "address": "00:000e",
+  "candidate": "hot_water_priority",
+  "mapping": {
+    "4151": "low",
+    "4152": "normal",
+    "4153": "high"
+  },
+  "status": "Candidate only on 170; requires panel comparison and a controlled change. Not exposed as a verified HA control.",
+  "frames": [
+    {
+      "protocol": 170,
+      "raw": "41444452078a656fde022a72010203040b08000000ca8e7242ae340617ff00001104ca52412b0140619d",
+      "source": "/home/bjwl/comfortzone-check-20261026-204442/capture.pcap",
+      "historical_label": null
+    },
+    {
+      "protocol": 180,
+      "raw": "41444452078a656fde022c72010203040b09000000ca8e7242ae34061fff00001103c252412b01406100003d",
+      "historical_label": "sanitary priority set to normal",
+      "source": "comfortzone_decoder.cpp historical capture comment"
+    },
+    {
+      "protocol": 180,
+      "raw": "41444452078a656fde022c72010203040b09000000ca8e7242ae34061fff00001103c253412b01406100007e",
+      "historical_label": "sanitary priority set to high",
+      "source": "comfortzone_decoder.cpp historical capture comment"
+    }
+  ]
+}

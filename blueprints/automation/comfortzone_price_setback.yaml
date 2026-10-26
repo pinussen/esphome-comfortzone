@@ -1,0 +1,151 @@
+blueprint:
+  name: ComfortZone – prisstyrd värmesänkning
+  description: >-
+    Sänker endast husvärmens börvärde när en vald signal anger dyr el.
+    Återgår till normalvärdet när elen blir billigare, rumstemperaturen blir
+    för låg, underlaget saknas eller styrningens hjälpbrytare stängs av.
+    Välj husvärmens climate-entitet, inte varmvatten. Värden måste väljas
+    uttryckligen. Ändrar inte varmvatten, fläkt, värmekurva eller driftläge.
+    Kräver att pumpens börvärde är tillgängligt. Vid utebliven
+    bekräftelse visas ett meddelande; ingen omedelbar omsändning görs.
+  domain: automation
+  input:
+    heating:
+      name: Husvärmens climate-entitet
+      selector:
+        entity:
+          filter:
+            domain: climate
+    enabled:
+      name: Hjälpbrytare för prisstyrning
+      description: Skapa en input_boolean och lämna den avstängd tills allt är valt.
+      selector:
+        entity:
+          filter:
+            domain: input_boolean
+    expensive:
+      name: Signal för dyr el
+      description: En binary_sensor där on betyder dyr el och off betyder normal/billig el.
+      selector:
+        entity:
+          filter:
+            domain: binary_sensor
+    indoor:
+      name: Aktuell inomhustemperatur
+      selector:
+        entity:
+          filter:
+            domain: sensor
+            device_class: temperature
+    normal:
+      name: Normalt värmebörvärde
+      selector:
+        number:
+          min: 10
+          max: 50
+          step: 0.1
+          unit_of_measurement: °C
+          mode: box
+    setback:
+      name: Värmebörvärde vid dyr el
+      description: Måste vara lägre än eller lika med normalvärdet.
+      selector:
+        number:
+          min: 10
+          max: 50
+          step: 0.1
+          unit_of_measurement: °C
+          mode: box
+    minimum_indoor:
+      name: Lägsta önskade inomhustemperatur
+      description: Under denna temperatur används normalvärdet även vid dyr el.
+      selector:
+        number:
+          min: 10
+          max: 30
+          step: 0.1
+          unit_of_measurement: °C
+          mode: box
+
+variables:
+  heating: !input heating
+  enabled: !input enabled
+  expensive: !input expensive
+  indoor: !input indoor
+  normal: !input normal
+  setback: !input setback
+  minimum_indoor: !input minimum_indoor
+
+triggers:
+  - trigger: state
+    entity_id: !input enabled
+    to: null
+    id: enable_changed
+  - trigger: state
+    entity_id: !input expensive
+    to: null
+    for: "00:00:30"
+    id: price_changed
+  - trigger: state
+    entity_id: !input indoor
+    to: null
+    id: room_changed
+  - trigger: homeassistant
+    event: start
+    id: startup
+  - trigger: time_pattern
+    minutes: "/15"
+    id: reconcile
+
+conditions:
+  - condition: template
+    value_template: >-
+      {{ is_state(enabled, 'on') or
+         (trigger is defined and trigger.id == 'enable_changed'
+          and trigger.from_state is not none and trigger.from_state.state == 'on'
+          and is_state(enabled, 'off')) }}
+  - condition: template
+    value_template: >-
+      {{ has_value(heating) and is_number(state_attr(heating, 'temperature'))
+         and is_number(normal) and is_number(setback)
+         and setback | float <= normal | float }}
+
+actions:
+  - variables:
+      desired: >-
+        {{ setback if is_state(enabled, 'on') and is_state(expensive, 'on')
+           and is_number(states(indoor))
+           and states(indoor) | float >= minimum_indoor | float
+           else normal }}
+  - condition: template
+    value_template: >-
+      {{ is_number(state_attr(heating, 'min_temp')) and is_number(state_attr(heating, 'max_temp'))
+         and state_attr(heating, 'min_temp') | float <= desired | float
+         and desired | float <= state_attr(heating, 'max_temp') | float
+         and (state_attr(heating, 'temperature') | float - desired | float) | abs > 0.05 }}
+  - action: climate.set_temperature
+    target:
+      entity_id: !input heating
+    data:
+      temperature: "{{ desired | float }}"
+  - wait_template: >-
+      {{ is_number(state_attr(heating, 'temperature'))
+         and (state_attr(heating, 'temperature') | float - desired | float) | abs <= 0.05 }}
+    timeout: "00:00:30"
+    continue_on_timeout: true
+  - if:
+      - condition: template
+        value_template: "{{ not wait.completed }}"
+    then:
+      - action: persistent_notification.create
+        data:
+          notification_id: "comfortzone_price_{{ heating | replace('.', '_') }}"
+          title: ComfortZone – börvärdet kunde inte bekräftas
+          message: >-
+            Begärde {{ desired }} °C för {{ heating }}, men fick ingen matchande
+            bekräftat börvärde inom 30 sekunder. Kontrollera Last pump write result.
+            Ingen omedelbar omsändning görs.
+
+mode: queued
+max: 10
+max_exceeded: warning

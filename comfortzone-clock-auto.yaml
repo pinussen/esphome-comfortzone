@@ -1,5 +1,36 @@
 # Include alongside comfortzone-package.yaml and comfortzone-protocol170.yaml.
 # Uses the existing SNTP timezone and verified hour/minute write sequence.
+api:
+  # Standalone scheduling must not reboot just because HA is disconnected.
+  reboot_timeout: 0s
+
+globals:
+  - id: comfortzone_last_clock_sync
+    type: std::string
+    restore_value: true
+    max_restore_data_length: 32
+    initial_value: '"Never recorded"'
+
+esphome:
+  on_boot:
+    priority: -100
+    then:
+      - lambda: |-
+          id(comfortzone_last_write_result).add_on_state_callback([](const std::string &x) {
+            if (x == "Pump time synchronized; readback verified (minute precision)" &&
+                id(sntp_time).now().is_valid()) {
+              id(comfortzone_last_clock_sync) = id(sntp_time).now().strftime("%Y-%m-%d %H:%M:%S %z");
+            }
+          });
+
+text_sensor:
+  - platform: template
+    name: "Last successful pump time sync"
+    entity_category: diagnostic
+    icon: mdi:clock-check-outline
+    update_interval: 10s
+    lambda: return id(comfortzone_last_clock_sync);
+
 switch:
   - platform: template
     name: "Automatic pump time sync"

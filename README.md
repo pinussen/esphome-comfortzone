@@ -69,6 +69,12 @@ is after the daylight-saving transition in Europe/Stockholm. There is no immedia
 boot sync or catch-up after a missed schedule; a failed or busy attempt is reported
 in `Last pump write result` and the next automatic attempt is the following day.
 Date and seconds remain unchanged. The HA example includes this optional package.
+The package also exposes **Last successful pump time sync**, saved across restarts
+once a manual or scheduled synchronization has been verified. This records success,
+not merely an attempted write. It disables the API's no-client reboot timer so
+HA being offline does not itself reboot the standalone scheduler; see ESPHome's
+[API reboot_timeout](https://esphome.io/components/api/#configuration-variables).
+Wi-Fi recovery settings are unchanged.
 Scheduling uses ESPHome's [on_time automation](https://esphome.io/components/time/#on_time-trigger).
 
 Add this entry under `packages:` in an existing HA Device Builder YAML:
@@ -208,3 +214,21 @@ The host runner supports protocols 160/170/180/221 and optional PCAP paths.
 It compiles the real C++ decoder with a fake UART/clock under ASan/UBSan.
 Tests and example configs contain no Wi-Fi/API credentials and do not contact a pump.
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the two-repository workflow and captures.
+
+
+## Follow-up tools and price control
+
+`register_coverage_v170.py capture.pcap --output coverage.json` inventories observed
+register addresses, scalar-schema coverage and changing bytes. It keeps devices
+and banks separate and does not name undocumented values. The latest findings,
+including a cross-version hot-water-priority candidate, are in PROTOKOLL-170.md.
+
+Protocol 170 measured input power now expires after 15 seconds without a complete
+power snapshot. All three daily input-energy integrators exclude unknown periods;
+they report observed energy and do not estimate energy lost during outages.
+The RS485 log separates read requests, read replies, writes and unhandled replies;
+“unhandled” is not a count of unique unknown registers.
+
+A configurable HA blueprint for price-triggered heating setback is prepared in
+[HA-PRISSTYRNING.md](HA-PRISSTYRNING.md). It requires explicit comfort values and
+an expensive-electricity signal. It has not been deployed to HA.

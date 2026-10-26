@@ -121,6 +121,13 @@ def decode_fields(f):
             continue
         result[field['offline_name']] = (None if value in field.get('invalid_raw', []) else
             value if field.get('offline_raw', False) else value / field['divisor'])
+    if f.bank == 0:
+        if (b := f.read(0x0e, 2)) is not None:
+            # Matches documented v180 capture codes at the same byte address.
+            # Still needs a protocol-170 panel comparison; offline only.
+            code = int.from_bytes(b, 'little')
+            result['candidate_hot_water_priority_code'] = f'{code:04x}'
+            result['candidate_hot_water_priority'] = {0x4151: 'low', 0x4152: 'normal', 0x4153: 'high'}.get(code)
     if f.bank == 1:
         if (b := f.read(4, 6)) is not None:
             hour, minute, second, day, month, year = b

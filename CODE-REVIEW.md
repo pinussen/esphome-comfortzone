@@ -1,5 +1,9 @@
 # EX50: kodgenomgång och fjärrstyrning, 2026-10-25
 
+Denna genomgång beskriver första etappen. Senare verifieringar, eldstadsknappar,
+tidssynk, driftprofiler och energiändringar finns daterade i
+[PROTOKOLL-170.md](PROTOKOLL-170.md) och [PROTOKOLL-PLAN.md](PROTOKOLL-PLAN.md).
+
 ## Två repon
 
 - `pinussen/comfortzone_heatpump`: protokoll, register, avkodning och skrivmotor.

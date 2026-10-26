@@ -34,6 +34,7 @@ text_sensor:
       entity_category: diagnostic
     last_write_result:
       name: "Last pump write result"
+      id: comfortzone_last_write_result
       entity_category: diagnostic
 select:
   - platform: comfortzone

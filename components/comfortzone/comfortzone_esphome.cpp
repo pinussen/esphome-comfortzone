@@ -459,7 +459,9 @@ namespace esphome::comfortzone
     status.heatpump_current_compressor_power.subscribe(on_power_sensor_update, heatpump_current_compressor_power_);
     status.heatpump_current_add_power.subscribe(on_power_sensor_update, heatpump_current_add_power_);
     status.heatpump_current_total_power.subscribe(on_power_sensor_update, heatpump_current_total_power_);
+#if HP_PROTOCOL != HP_PROTOCOL_1_7
     status.heatpump_current_compressor_input_power.subscribe(on_power_sensor_update, heatpump_current_compressor_input_power_);
+#endif
 
     status.compressor_energy.subscribe(on_energy_sensor_update, compressor_energy_);
     status.add_energy.subscribe(on_energy_sensor_update, add_energy_);
@@ -554,8 +556,14 @@ namespace esphome::comfortzone
     const uint32_t now = esphome::millis();
     if (now - last_bus_report_ >= 30000) {
       last_bus_report_ = now;
-      ESP_LOGI(TAG, "RS485: frames=%" PRIu32 " CRC errors=%" PRIu32 " unknown registers=%" PRIu32,
+      ESP_LOGI(TAG, "RS485: frames=%" PRIu32 " CRC errors=%" PRIu32 " unhandled frames=%" PRIu32,
                received_frames_, corrupted_frames_, unknown_frames_);
+      const auto &traffic = heatpump_->traffic_stats();
+      ESP_LOGI(TAG, "RS485 types: read requests=%" PRIu32 " write requests=%" PRIu32
+               " read replies=%" PRIu32 " write replies=%" PRIu32
+               " decoded read replies=%" PRIu32 " unhandled read replies=%" PRIu32,
+               traffic.read_requests, traffic.write_requests, traffic.read_replies, traffic.write_replies,
+               traffic.decoded_read_replies, traffic.unhandled_read_replies);
     }
 #ifdef USE_TEXT_SENSOR
     auto &clock = heatpump_->comfortzone_status;
@@ -662,6 +670,7 @@ namespace esphome::comfortzone
   void ComfortzoneComponent::publish_operating_170_() {
     const auto result = heatpump_->operating_170();
 #ifdef USE_SENSOR
+    publish_derived_state(heatpump_current_compressor_input_power_, result.input_power);
     publish_derived_state(heatpump_current_compressor_heating_input_power_, result.heating_input);
     publish_derived_state(heatpump_current_compressor_water_input_power_, result.water_input);
     publish_derived_state(heating_cop_, result.heating_cop);

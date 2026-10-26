@@ -204,3 +204,24 @@ Verifierat med sju Python-tester, bibliotekets hosttester under ASan/UBSan,
 snapshotkontroll och ESPHome 2026.10.0 / ESP-IDF 5.5.6-bygge av TX26-konfigurationen.
 Bygget lyckades utan de rapporterade C++-varningarna. Ingen verifiering av nya
 registerbetydelser ingår i dessa underhållstester.
+
+## Genomfört 2026-10-26 och nästa kontroll
+
+- Tre minuters passiv trafik: 985 CRC-giltiga ramar, varav 489 läsfrågor och
+  496 lässvar. Nattens synk kan inte styrkas efter en API-relaterad omstart.
+- Verifierad ny manuell synk och sparad senaste lyckade synktid i HA-entitet.
+  API-timern för omstart utan klient stängs av i det automatiska klockpaketet.
+- Totala eleffekten löper nu ut precis som fördelad effekt. Total dygnsenergi
+  använder observationsfilter och fyller inte längre bortfall med nästa prov.
+- Trafikräknare skiljer transporttyper från avkodade/obehandlade lässvar.
+  Generisk inventering av adressområden och byteförändringar tillagd offline.
+- `00:000e` prioriteras för nästa paneljämförelse: kandidat till samma
+  varmvattenprioritetskoder i 170 och 180. Inte aktiverat som ny skrivfunktion.
+- HA-blueprint för prisstyrd värmesänkning förberedd, ännu inte HA-validerad
+  eller installerad. Kräver användarens temperaturgränser och prissignal.
+
+Nästa fysiska verifiering är längre fångst av naturliga driftövergångar, särskilt
+avfrostning/tillskott, samt panelkontroll vid eldstadsläge och varmvattenprioritet.
+Nuvarande stoppfall `20 08 00 00 10` har noll komplett effekt men inget oberoende
+panelnamn och ska därför inte ges en ny mode-etikett på chans. De senaste
+ändringarna är en etapp, inte en komplett protokollspecifikation.

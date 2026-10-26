@@ -15,6 +15,20 @@ def frame(reg, time=100):
 
 
 class DecodeTest(unittest.TestCase):
+    def test_priority_candidate_shared_address_across_versions(self):
+        data = json.loads(Path(__file__).with_name('v170_priority_candidates.json').read_text())
+        codes = []
+        for sample in data['frames']:
+            f = Frame(0, bytes.fromhex(sample['raw']))
+            self.assertTrue(valid_frame(f.raw))
+            code = int.from_bytes(f.read(0x0e, 2), 'little')
+            codes.append(code)
+            if sample['protocol'] == 170:
+                self.assertEqual(decode_fields(f)['candidate_hot_water_priority'], 'normal')
+            else:
+                self.assertEqual(decode_fields(f), {}) # no cross-version decoding
+        self.assertEqual(codes, [0x4152, 0x4152, 0x4153])
+
     def test_scalar_schema_signed_bounds_and_partial_fields(self):
         def sample(bank, address, payload, prefix=8):
             raw = bytearray(frame('010000').raw[:21])

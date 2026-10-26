@@ -604,3 +604,73 @@ Slutarkiv med firmware/hash, kontrollskript, loggar, PCAP och
 Infångade tim-/minutkvittensramar och återläsning finns även som testfixturer.
 För att behålla samma nollbytespolicy vid nästa HA-bygge behöver enhetens
 YAML innehålla `comfortzone: {zero_byte_idle: true}` och den uppdaterade komponenten.
+
+## Uppföljning 2026-10-26: synk, energi och fortsatt kartläggning
+
+Första anslutningen 20:44 fann samma firmware som kvällen före, men cirka
+602 sekunders drifttid och `Reboot request from api`. Skrivresultatet var tomt.
+Nattens 04:10-körning kan därför inte bekräftas från enheten efter omstarten.
+API-standardens 15 minuter utan klient är en möjlig förklaring till omstarten,
+inte en observerad orsak från själva händelsen. Det automatiska klockpaketet
+stänger nu av just API-omstartstimern (`api.reboot_timeout: 0s`).
+
+Passiv fångst `/home/bjwl/comfortzone-check-20261026-204442/capture.pcap`:
+985 CRC-giltiga ramar, 489 läsfrågor och 496 lässvar, 36 olika startområden och
+22 överlappsjämförelser mellan områden. Inga CRC-fel syntes i enhetens räknare.
+Detta är en stickprovskontroll på tre minuter, inte bevis på obruten nattdrift
+eller en förlustfri UDP-fångst. Klockans mottagna tider låg 4,5–5,5 sekunder före.
+Kompletta status-/effektpar visade profilen `20 08 00 00 10`, 0 Hz och samtliga
+fem effekt-/frekvensfält noll. Aktiviteten kan därmed klassas som stoppad; exakt
+mode lämnas okänt utan panelkontroll. Paret finns i statusfixtures.
+
+Bibliotek `9728d01975b9` skiljer nu transportstatistik (R/W/r/w och CRC-fel)
+från avkodningsresultat. `unhandled frames` ersätter det missvisande namnet
+`unknown registers`. `decoded read replies` betyder minst ett igenkänt fält,
+inte att alla byte i svaret är förstådda. Trafik från andra källor/profiler kan
+också räknas som obehandlade lässvar. Okända kommandobokstäver stöds ännu inte
+av ramparsern.
+
+Samma ändring låter den totala uppmätta ingångseffekten löpa ut efter 15 s utan
+komplett nytt effektsvar. Total dygnsenergi använder nu samma observationsfilter
+som värme/VV: inga saknade intervall fylls med nästa värde. Det är observerad
+energi, inte en rekonstruktion av förbrukning under avbrott. Upp till 15 s används
+senaste giltiga provet innan det blir okänt. Äldre ackumulerad statistik rättas
+inte retroaktivt. Tillskottsfall och avfrostning har fortfarande inte fått någon
+ny gissad CoP-fördelning.
+
+`register_coverage_v170.py` inventerar unika byteadresser per källa och bank,
+förändringar och områden utanför den skalära registertabellen. Klocka, status,
+flyttalskandidater och historik ligger också utanför tabellen, så detta är inte
+en procentandel av hur mycket av protokollet som är okänt. Treminutersfångsten
+visar 3 365 adresser, varav 74 finns i den skalära tabellen. Verktyget sparar råa
+sista observationer utan att påstå att olika paket är en samtidig ögonblicksbild.
+
+En konkret versionsjämförelse gäller `00:000e`: aktuell 170-trafik har LE16
+`0x4152`, samma kod och adress som det äldre 180-exemplet märkt normal
+varmvattenprioritet. Ett 180-exempel märkt hög har `0x4153`; äldre avkodare anger
+även `0x4151` för låg. Detta stödjer en **kandidat** till samma fält i båda
+versionerna, men paneljämförelse och ändringsfångst för 170 återstår. Råbeläggen
+finns i `tests/v170_priority_candidates.json`; endast offlineverktyget visar
+kandidaten. Ingen ny skrivbar adress har aktiverats utifrån antagandet.
+
+Firmware byggd 20:49:08 installerades och manuell klocksynk testades. Minut 54
+kvitterades och bekräftades av ett senare klocksvar. Den nya entiteten
+`Last successful pump time sync` fick `2026-10-26 20:54:17 +0100`; referensklockan
+låg därefter cirka tre sekunder efter pumpen. Resultatet sparas vid verifierad
+framgång, även när knappen används manuellt, och säger alltså inte i sig att en
+schemalagd körning har skett. Ingen ny synk registreras vid fel. Inställningen
+sparas via ESPHomes preferences, med dess normala fördröjning för flashskrivning.
+Fångst och verifiering finns i
+`/home/bjwl/comfortzone-followup-release-20261026-205308/`.
+
+HA-prisstyrning är förberedd som blueprint med obligatoriska komfortval, men
+inte installerad eller aktiverad. Se `HA-PRISSTYRNING.md` för återställning,
+ACK-baserad återkoppling och begränsningar. Praktiskt paneltest av eldstadsläge,
+varmvattenprioritet och längre naturliga driftövergångar återstår.
+
+Slutbygget 20:56:23 med API-omstartstimern avstängd installerades via OTA.
+Efter denna omstart återkom `Last successful pump time sync` med exakt samma
+sparade tidpunkt, `2026-10-26 20:54:17 +0100`, utan en ny knapptryckning.
+Det verifierar återställningen över omstart. Kortet passerade startkontrollen,
+fortsatte ta emot pumpdata och hade 0 CRC-fel under efterkontrollen. Ett helt
+dygn utan HA-klient och nästa nattliga schemakörning har inte observerats här.
