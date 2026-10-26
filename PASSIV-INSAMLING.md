@@ -7,9 +7,18 @@ En fristående process samlar i 24 timmar från kortet `08:B6:1F:38:5A:C0`,
 2026-10-27 om VM:n fortsätter köra. Den ändrar inga pumpregister och installerar
 ingen firmware. Den befintliga automatiska tidssynken är fortfarande aktiv.
 
-Arkiv: `/home/bjwl/comfortzone-passive-20261026/`.
+Första arkivdel: `/home/bjwl/comfortzone-passive-20261026/`.
+Aktiv del efter införande av diskskydd:
+`/home/bjwl/comfortzone-passive-20261026-bounded/`.
 PID-fil: `/home/bjwl/comfortzone-passive-20261026.pid`.
 Processlogg: `/home/bjwl/comfortzone-passive-20261026-process.log`.
+
+Insamlingen startades om med diskskydd efter cirka 6,1 MiB. Ursprunglig sluttid
+behålls. Den nya delen stoppas vid sammanlagt 128 MiB eller mindre än 2048 MiB
+ledigt diskutrymme. Storleken kontrolleras före varje bulk-skrivning, ledigt
+utrymme högst en gång per sekund under skrivning. 64 KiB reserveras för
+slutstatus; stopporsaken sparas i `status.json`. Äldre filer raderas inte.
+Gränserna kan anges med `--max-mib` respektive `--min-free-mib`.
 
 - `capture.pcap`: mottagna UDP-payloads med syntetiska Ethernet/IP-huvuden.
   Tiden är mottagning på VM:n, inte seriell sändtid. IP-checksumman är giltig.

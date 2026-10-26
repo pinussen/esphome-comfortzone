@@ -11,9 +11,34 @@ import json
 import math
 from pathlib import Path
 import signal
+import shutil
 import socket
 import struct
 import time
+
+
+class DiskBudget:
+    """Reserve space for the final status; stop all bulk writes at the limit."""
+    def __init__(self, path, max_bytes, min_free_bytes):
+        self.path, self.limit, self.min_free = path, max_bytes-65536, min_free_bytes
+        self.used = 24
+        self.checked = None
+        self.reason = None
+
+    def allow(self, size):
+        if self.reason:
+            return False
+        if self.used+size > self.limit:
+            self.reason = 'capture_size_limit'
+            return False
+        now = time.monotonic()
+        if self.checked is None or now-self.checked >= 1:
+            self.checked = now
+            if shutil.disk_usage(self.path).free < self.min_free:
+                self.reason = 'free_disk_space_limit'
+                return False
+        self.used += size
+        return True
 
 
 def udp_record(data, source, destination, source_port, port, now):
@@ -43,18 +68,28 @@ async def monitor(args):
     last_packet = None
     connections = 0
     states = {}
+    budget = DiskBudget(args.output, args.max_mib*1024**2, args.min_free_mib*1024**2)
     f = (args.output/'capture.pcap').open('wb')
     f.write(struct.pack('<IHHIIII', 0xa1b2c3d4, 2, 4, 0, 0, 65535, 1))
     events = (args.output/'events.jsonl').open('w', buffering=1)
     logs = (args.output/'device.jsonl').open('w', buffering=1)
 
+    def write(stream, data):
+        if budget.allow(len(data.encode('utf-8')) if isinstance(data, str) else len(data)):
+            stream.write(data)
+            return True
+        stop.set()
+        return False
+
     def event(kind, **values):
-        events.write(json.dumps(dict(time=time.time(), kind=kind, **values), allow_nan=False)+'\n')
+        write(events, json.dumps(dict(time=time.time(), kind=kind, **values), allow_nan=False)+'\n')
 
     def checkpoint(phase, connected=False):
         tmp = args.output/'status.tmp'
         tmp.write_text(json.dumps(dict(phase=phase, started=started, updated=time.time(),
                                       duration_hours=args.hours, connected=connected,
+                                      max_mib=args.max_mib, min_free_mib=args.min_free_mib,
+                                      stop_reason=budget.reason,
                                       connections=connections, packets=count,
                                       last_packet=last_packet, states=states), indent=2)+'\n')
         tmp.replace(args.output/'status.json')
@@ -66,8 +101,8 @@ async def monitor(args):
             if addr[0] != args.host:
                 return
             last_packet = time.time()
-            f.write(udp_record(data, addr[0], args.listen, addr[1], args.port, last_packet))
-            count += 1
+            if write(f, udp_record(data, addr[0], args.listen, addr[1], args.port, last_packet)):
+                count += 1
 
     transport = None
     try:
@@ -104,7 +139,7 @@ async def monitor(args):
 
                 def log(m):
                     msg = m.message.decode(errors='replace') if isinstance(m.message, bytes) else str(m.message)
-                    logs.write(json.dumps(dict(time=time.time(), message=msg))+'\n')
+                    write(logs, json.dumps(dict(time=time.time(), message=msg))+'\n')
 
                 c.subscribe_states(state)
                 c.subscribe_logs(log, log_level=LogLevel.LOG_LEVEL_INFO, dump_config=True)
@@ -151,9 +186,13 @@ if __name__ == '__main__':
     p.add_argument('--listen', required=True, help='Collector IPv4 reachable from device')
     p.add_argument('--port', type=int, default=19502)
     p.add_argument('--hours', type=float, default=24)
+    p.add_argument('--max-mib', type=int, default=128, help='Total bulk output limit, MiB')
+    p.add_argument('--min-free-mib', type=int, default=2048, help='Stop below this free disk space')
     p.add_argument('--secrets', type=Path, default=Path('secrets.yaml'))
     p.add_argument('--output', type=Path, required=True)
     args = p.parse_args()
+    if args.max_mib < 1 or args.min_free_mib < 1:
+        p.error('Disk limits must be positive')
     if not 0 < args.hours <= 72 or not 1 <= args.port <= 65535:
         p.error('hours must be >0 and <=72; port must be 1..65535')
     for address in (args.host, args.listen):
