@@ -290,3 +290,47 @@ API-historiken visar oförändrade börvärden 29,1/53,1 °C, kurva 5 och fläkt
 Enda registrerade skrivresultatsekvensen är tidssynken 04:10. Det ger inget
 stöd för att statusbitens förändring orsakades av dessa användarreglage.
 39 Python-tester och C++-regressionstester under ASan/UBSan passerar.
+
+### Fortsatt registerjämförelse 2026-10-28
+
+Insamlingen stoppade automatiskt 2026-10-27 21:46:37 vid storleksgränsen,
+efter 339383 mottagna UDP-paket i den begränsade delen. Den startades inte om.
+
+Flaggbytet `20` till `28` observerades omkring 2026-10-27 13:58 svensk tid.
+Jämförelse av register före/efter pekade först på `01:00c3`, men 844 färska
+par gav alla fyra kombinationer: `(20,0)=500`, `(20,1)=14`, `(28,0)=317`,
+`(28,1)=13`. 161 observationer saknade status högst två sekunder gammal och
+uteslöts. En enkel spegling av biten är därmed falsifierad; samtidighet vid
+ett enskilt byte räcker inte. Råexempel och tider finns lokalt i
+`comfortzone-status-20261027/flag-c3-pairs.json` och `flag-transition.json`.
+
+Jämförelse mot frekvenskanalerna i samma effektmeddelande gav starkare belägg:
+
+| Status | Färska par | 02d5 positiv, 02d7 noll | 02d5 noll, 02d7 positiv |
+| --- | ---: | ---: | ---: |
+| `202a000010` | 1723 | 1723 | 0 |
+| `282a000010` | 95 | 94 | 0 |
+| `282c000010` | 364 | 0 | 364 |
+| `201a000016` | 688 | 688 | 0 |
+| `281c000016` | 41 | 0 | 41 |
+
+Det sista paret i `282a` har båda begärda frekvenserna noll men fortfarande
+positiv faktisk frekvens: ännu ett skäl att skilja begäran från faktisk drift.
+I `201a`/`281c` är faktisk frekvens och effekterna noll trots positiv begäran.
+Det stöder uppdelning i separata drift- och begärandebitar, men namnger inte
+ensamt avfrostning. Äldre kod för 160/180 tolkar bitar i andra statusbyten på
+liknande sätt; dess exakta betydelser får inte kopieras över alla profiler.
+
+Biblioteket utökas nu med exakt `202a000010` som husvärme och `2008000010`
+som idle vid komplett nollbild. Beslutet grundas på hela ovanstående jämförelse,
+inte på ett påstående om att första statusbyten saknar betydelse. Det är
+fångststödd tolkning, inte en ny panelbekräftelse. `20` med andra andrabytesvärden
+förblir okänt. Gränser för färskhet, parning och tillskott ändras inte.
+Verktyget `status_profiles_v170.py` redovisar nu begärandekanalerna separat och
+bevarar motexempel. Nya regressionstester skyddar mot att okända `20`-varianter
+råkar få varmvattenetikett. Inga pumpinställningar har ändrats.
+
+Bibliotek `9292e75` är importerat som låst snapshot. 41 Python-tester,
+C++-tester under ASan/UBSan och ESPHome-bygget (2026-10-28 00:04:48) passerar.
+Firmware är byggd men inte OTA-installerad i denna etapp. Motexemplen för
+`00c3` finns även incheckade i `tests/v170_flag_counterexamples.json`.
