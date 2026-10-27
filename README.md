@@ -230,6 +230,10 @@ duration; do not treat their UDP packet rate as the physical polling rate.
 [PASSIV-INSAMLING.md](PASSIV-INSAMLING.md) documents the bounded, reconnecting
 24-hour collector, its local output and the archive comparison.
 
+`status_profiles_v170.py capture.pcap --output profiles.json` groups complete
+status/power observations, excludes stale pairs from numeric ranges and retains
+original example frames. It does not infer physical mode names from correlation.
+
 Protocol 170 measured input power now expires after 15 seconds without a complete
 power snapshot. All three daily input-energy integrators exclude unknown periods;
 they report observed energy and do not estimate energy lost during outages.

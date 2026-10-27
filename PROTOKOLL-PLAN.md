@@ -244,3 +244,49 @@ identifierar generell färskhet hos övriga givare och ACK kontra oberoende
 återläsning som kvarvarande arbete. 35 Python-tester, 23529 återspelade ramar
 under ASan/UBSan och ESPHome-bygget passerar. Metadataändringarna väntar på
 nästa installation så att dygnsinsamlingsperioden får oförändrad firmware.
+
+### Status-/effektanalys 2026-10-27
+
+En fryst kopia av pågående dygnsfångst finns lokalt i
+`/home/bjwl/comfortzone-status-20261027/`. SHA256 för `capture.pcap`:
+`a30aa686f6aa1f09272d2923d14282229f16f3e490b337215b57d463b03a9cb7`.
+`observations.json` och `profiles.json` innehåller råramar och tidsavstånd.
+
+8624 kompletta effektobservationer: 7337 har status från samma pump högst två
+sekunder tidigare, 1287 saknar ett sådant par. Det är observationsantal, inte
+andel drifttid. Nytt verktyg `status_profiles_v170.py` sammanställer detta med
+råexempel, skilda enheter och separata räknare för ofullständiga tidspar,
+ogiltiga värden, kompletta nollbilder och inkonsekventa effektsummor.
+
+| Rå status | Par inom 2 s | Frekvens, Hz | Eleffekt, W | Tolkning i denna etapp |
+| --- | ---: | ---: | ---: | --- |
+| `202a000010` | 1723 | 25–43,3 | 515–1193 | Aktiv profil; första byten stöds inte av nuvarande mode-avkodare |
+| `282a000010` | 95 | 25–36,2 | 515–1047 | Befintlig värmeprofil |
+| `282c000010` | 364 | 25–55 | 773–1643 | Befintlig varmvattenprofil |
+| `201a000016` | 688 | 0 | 0 | Alla fem effekt-/frekvensfält noll; fysiskt driftnamn obekräftat |
+| `281c000016` | 41 | 0 | 0 | Alla fem effekt-/frekvensfält noll; fysiskt driftnamn obekräftat |
+| `2028000010` | 1 | 0 | 697 | Samtidigt 2000 W uteffekt: övergång/motexempel, inte en sammanhängande normaldriftsbild |
+
+Första statusbyten växlar mellan `20` och `28`; det är en skillnad i bit `08`.
+Det finns belägg för positiv frekvens även med `20`, så den byten kan inte ensam
+användas för att avgöra att kompressorn står. Bitens funktion är fortfarande
+okänd. Vi aktiverar därför inte automatiskt samma värme-/CoP-fördelning för
+`202a` som för `282a` enbart på liknande effektintervall.
+
+Många för gamla tidspar är omkring 7, 14 och 21 sekunder gamla, alltså ungefär
+hela pollcykler. Detta kan bero på saknade statusobservationer i fångsten;
+råloggen räcker inte för att fastställa var de försvann. Att utöka parningsfönstret
+skulle riskera att blanda effekt från ett nytt driftläge med föregående status.
+Tvåsekundersgränsen behålls. Inga tillskott över noll observerades i dessa par.
+
+Tolv nya status-/effektpar har lagts till som regressionstest i båda repona,
+inklusive samma status med noll respektive icke-noll värden. Okända profiler
+förblir okända. Inga ändringar av pumpinställningar, produktionsavkodare eller
+firmwareinstallation gjordes i denna analys. Nästa steg är att spåra flaggan
+`08` mot andra register och jämföra observerade statusluckor med enhetens
+trafikräknare innan nya mode-etiketter eller längre tidsgränser övervägs.
+
+API-historiken visar oförändrade börvärden 29,1/53,1 °C, kurva 5 och fläkt Low.
+Enda registrerade skrivresultatsekvensen är tidssynken 04:10. Det ger inget
+stöd för att statusbitens förändring orsakades av dessa användarreglage.
+39 Python-tester och C++-regressionstester under ASan/UBSan passerar.
