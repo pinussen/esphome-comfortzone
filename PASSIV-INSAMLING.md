@@ -1,5 +1,22 @@
 # Passiv insamling och granskning
 
+## Förlängd veckokörning 2026-10-28
+
+På användarens begäran ersattes den fristående 72-timmarsinsamlingen med en
+168-timmarskörning den 28 oktober 20:54:59. Planerat slut är 4 november
+20:54:59 svensk tid, så att måndag 2 november ingår. Arkiv:
+`/home/bjwl/comfortzone-week-20261028-205459/`. Filen
+`/home/bjwl/comfortzone-long-current-path` pekar på aktuell körning; `run.json`
+och `process.pid` i arkivet innehåller processuppgifter och gränser.
+
+Vid start fanns 41 GiB ledigt. Gränserna är 4096 MiB insamlade data och minst
+5120 MiB ledigt diskutrymme. Den tidigare datan är kvar i sitt arkiv; ett kort
+avbrott uppstod när insamlingsprocessen byttes. Pumpen startades inte om och
+inga pumpinställningar ändrades. Processen är frikopplad från terminalen men
+återstartar inte automatiskt efter en VM-omstart. Misstänkt legionellakörning
+ska jämföras mot temperatur, tillskott och rå status; någon sådan körning har
+ännu inte identifierats.
+
 ## Pågående körning 2026-10-26
 
 En fristående process samlar i 24 timmar från kortet `08:B6:1F:38:5A:C0`,

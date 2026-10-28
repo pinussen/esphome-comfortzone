@@ -193,8 +193,8 @@ if __name__ == '__main__':
     args = p.parse_args()
     if args.max_mib < 1 or args.min_free_mib < 1:
         p.error('Disk limits must be positive')
-    if not 0 < args.hours <= 72 or not 1 <= args.port <= 65535:
-        p.error('hours must be >0 and <=72; port must be 1..65535')
+    if not 0 < args.hours <= 168 or not 1 <= args.port <= 65535:
+        p.error('hours must be >0 and <=168; port must be 1..65535')
     for address in (args.host, args.listen):
         socket.inet_aton(address)
     asyncio.run(monitor(args))
