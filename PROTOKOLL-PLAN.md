@@ -334,3 +334,31 @@ Bibliotek `9292e75` är importerat som låst snapshot. 41 Python-tester,
 C++-tester under ASan/UBSan och ESPHome-bygget (2026-10-28 00:04:48) passerar.
 Firmware är byggd men inte OTA-installerad i denna etapp. Motexemplen för
 `00c3` finns även incheckade i `tests/v170_flag_counterexamples.json`.
+
+### Ny analys 2026-10-28 cirka 21:00
+
+Den avslutade första långfångsten (`comfortzone-long-20261028-001251/data`)
+gav 9675 kompletta effektobservationer. Rapport med råexempel ligger lokalt i
+`comfortzone-long-20261028-001251-profile-review.json`; statussekvenser i
+`comfortzone-long-20261028-001251-status-runs.json`.
+
+- `281a000016` förekommer i tre separata följder: 18:46:38, 19:42:17 och
+  20:39:55 svensk tid. Från första till sista observerade status i respektive
+  följd är det 308, 432 och 368 sekunder (inte exakta fysiska varaktigheter).
+  Alla 169 färska effektpar är kompletta nollbilder, men `02d5` är positiv och
+  `02d7` noll. Följderna ligger mellan värmedrift och ny uppstart. Det stärker
+  avfrostningshypotesen, men stoppläget får fortsatt inget nytt fysiskt namn.
+- Alla 211 färska par med `282e000010` har både `02d5` och `02d7` positiva.
+  Tidigare panelprov visade varmvatten med denna profil. Därför ska positiva
+  begärandekanaler inte automatiskt tolkas som samtidig värmeproduktion.
+- `28ae000010` är kortvarig mellan två `282e`-följder vid 04:33 och 20:12.
+  Ett färskt effektpar har 30 Hz och 1054 W in: detta är ett motexempel mot
+  att generellt kalla högbiten `80` stopp eller avfrostning.
+- Verifierat färska värmepar når 61,0 Hz och upp till 1692 W in. Högsta
+  frekvensobservationen är 61,3 Hz men saknar status inom två sekunder;
+  frekvensbegäran i samma effektmeddelande är 613/0. Dessa skiljs i rapporten.
+- Ingen `20`/`28`-växling i denna fångst. Varmvatten 49,8–53,6 °C, noll
+  observerat tillskott och oförändrad tillskottsenergi ger inget belägg för
+  legionellahöjning hittills. Veckokörningen startade först 20:55 och fortsätter.
+
+Detta är analysresultat, inte ytterligare ändringar av produktionsavkodaren.
