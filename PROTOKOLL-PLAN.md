@@ -385,3 +385,13 @@ Clock sync retries at most twice, after five seconds, only when the library
 confirms no UART transmission was attempted. Each retry samples current time
 again. Missing ACK / partial transmission still fails without a retry. Overall
 sync timeout is 180 seconds. Bus collision checks are unchanged.
+
+
+Validation: 42 Python tests passed; real decoder/write/clock tests passed under
+ASan/UBSan. ESPHome 2026.10 / ESP-IDF 5.5.6 firmware compiled successfully
+(853711 bytes, 27.8% static RAM). Main/master histories were reconciled,
+retaining the current UART-dependent setup order, ESPHome build flags and
+asynchronous write handling rather than reintroducing older debug workarounds.
+Firmware built 2026-11-13 22:57:03 +0100 was uploaded successfully to
+08:B6:1F:38:5A:C0 at 192.168.3.179. Field validation of the bounded clock
+retry behavior will require a subsequent busy-bus synchronization attempt.
