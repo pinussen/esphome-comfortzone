@@ -362,3 +362,26 @@ gav 9675 kompletta effektobservationer. Rapport med råexempel ligger lokalt i
   legionellahöjning hittills. Veckokörningen startade först 20:55 och fortsätter.
 
 Detta är analysresultat, inte ytterligare ändringar av produktionsavkodaren.
+
+
+## 2026-11-13: week capture incorporated
+
+Capture completed 2026-11-04 20:55, 2,532,329 packets, one API connection.
+No collection has run since. Reports remain in /home/bjwl/comfortzone-week-review-*.json
+and comfortzone-week-final-review-20261113.json; original frames for the new
+profiles are preserved in tests/v170_week_fixtures.json in both repositories.
+
+Corrected heater power to 01:0315; 01:0317 remained zero even with 6 kW
+heater output and increasing heater energy. Keep compressor electrical input
+separate from thermal output and heater output. Existing historical HA
+heater/energy readings cannot be repaired by changing the decoder.
+
+Expose Pump raw status as a diagnostic text sensor, expired after 15 seconds.
+Accept only observed 23/2A, 23/2E, 23/08 and 30/2A profiles, retaining pairing,
+freshness and allocation checks. Defrost and scheduled-vs-manual boost remain
+unverified; a 70 C cycle alone does not prove a unique legionella status bit.
+
+Clock sync retries at most twice, after five seconds, only when the library
+confirms no UART transmission was attempted. Each retry samples current time
+again. Missing ACK / partial transmission still fails without a retry. Overall
+sync timeout is 180 seconds. Bus collision checks are unchanged.

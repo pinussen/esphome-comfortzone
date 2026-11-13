@@ -677,6 +677,13 @@ namespace esphome::comfortzone
     publish_derived_state(water_cop_, result.water_cop);
 #endif
 #ifdef USE_TEXT_SENSOR
+    char raw[11] = "unknown";
+    if (result.status_known)
+      snprintf(raw, sizeof(raw), "%02x%02x%02x%02x%02x",
+               result.raw_status[0], result.raw_status[1], result.raw_status[2],
+               result.raw_status[3], result.raw_status[4]);
+    if (raw_status_ && (!raw_status_->has_state() || raw_status_->state != raw))
+      raw_status_->publish_state(raw);
     const char *mode = result.mode == CZMD_ROOM_HEATING ? "heating" :
                        result.mode == CZMD_HOT_WATER ? "hot_water" :
                        result.mode == CZMD_IDLE ? "idle" : "unknown";
@@ -1001,7 +1008,7 @@ namespace esphome::comfortzone
 #if HP_PROTOCOL == HP_PROTOCOL_1_7 && defined(USE_TIME)
     if (clock_sync_.active())
       clock_sync_.acknowledged(heatpump_->write_result() == comfortzone_heatpump::WriteResult::SUCCESS,
-                              heatpump_->clock_read_sequence(), esphome::millis());
+                              heatpump_->clock_read_sequence(), esphome::millis(), !heatpump_->write_transmitted());
 #endif
 #ifdef USE_TEXT_SENSOR
     if (last_write_result_) last_write_result_->publish_state(heatpump_->last_message);

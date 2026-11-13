@@ -29,6 +29,9 @@ sensor:
       entity_category: diagnostic
 text_sensor:
   - platform: comfortzone
+    raw_status:
+      name: "Pump raw status"
+      entity_category: diagnostic
     pump_datetime:
       name: "Pump clock"
       entity_category: diagnostic

@@ -27,7 +27,7 @@ def observations(stream):
             continue
         previous = statuses.get(f.device)
         age = time-previous[0] if previous else None
-        values = [int.from_bytes(f.read(a,2),'little') for a in (0x2e9,0x313,0x317,0x319,0x321)]
+        values = [int.from_bytes(f.read(a,2),'little') for a in (0x2e9,0x313,0x315,0x319,0x321)]
         yield dict(time_utc=datetime.fromtimestamp(time, timezone.utc).isoformat(), device=f.device,
                    status=previous[1].hex() if previous else '', status_age_s=round(age,3) if age is not None else '',
                    paired=age is not None and 0 <= age <= 2,

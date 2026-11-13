@@ -139,6 +139,7 @@ class EspHomeRS485Interface;
 #endif
 
 #ifdef USE_TEXT_SENSOR
+    void set_raw_status_sensor(text_sensor::TextSensor *value) { raw_status_ = value; }
     void set_pump_datetime_sensor(text_sensor::TextSensor *value) { pump_datetime_ = value; }
     void set_last_write_result_sensor(text_sensor::TextSensor *value) { last_write_result_ = value; }
     void set_compressor_activity_sensor(text_sensor::TextSensor *compressor_activity);
@@ -290,6 +291,7 @@ class EspHomeRS485Interface;
 #endif
 
 #ifdef USE_TEXT_SENSOR
+    text_sensor::TextSensor *raw_status_{nullptr};
     text_sensor::TextSensor *pump_datetime_{nullptr};
     text_sensor::TextSensor *last_write_result_{nullptr};
     int last_clock_second_{-1};

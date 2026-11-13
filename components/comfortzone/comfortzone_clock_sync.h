@@ -15,27 +15,37 @@ class ClockSync {
   enum class Action { NONE, HOUR, MINUTE, DONE, FAILED };
   bool start(uint32_t now) {
     if (active_) return false;
-    active_=true; phase_=0; waiting_ack_=false; started_=now; error_=nullptr;
+    active_=true; phase_=0; waiting_ack_=false; started_=now; error_=nullptr; retries_=0; retry_wait_=false;
     return true;
   }
   bool active() const { return active_; }
   int value() const { return value_; }
   const char *error() const { return error_ ? error_ : "Clock synchronization failed"; }
-  void acknowledged(bool success, uint32_t sequence, uint32_t now) {
+  void acknowledged(bool success, uint32_t sequence, uint32_t now, bool nothing_sent=false) {
     if (!active_ || !waiting_ack_) return;
     waiting_ack_=false;
-    if (!success) { error_="Clock write failed; no retry"; return; }
+    if (!success) {
+      if (nothing_sent && retries_ < 2) {
+        ++retries_; retry_wait_=true; retry_started_=now;
+        return; // Recompute hour/minute from the reference on the next attempt.
+      }
+      error_="Clock write failed; no further retry"; return;
+    }
     read_sequence_=sequence; read_started_=now; ++phase_;
   }
   Action poll(const Clock &pump, const Clock &reference, uint32_t now) {
     if (!active_) return Action::NONE;
     if (error_) return fail(error_);
-    if (now-started_ > 90000) return fail("Clock synchronization timed out");
+    if (now-started_ > 180000) return fail("Clock synchronization timed out");
     if (!reference.valid) return fail("Time source is not synchronized");
     if (!pump.valid) return fail("No fresh pump clock readback");
     if (pump.year!=reference.year || pump.month!=reference.month || pump.day!=reference.day)
       return fail("Pump date differs; set the date on the pump first");
     if (waiting_ack_) return Action::NONE;
+    if (retry_wait_) {
+      if (now-retry_started_ < 5000) return Action::NONE;
+      retry_wait_=false;
+    }
     if (phase_==1 || phase_==3) {
       if (now-read_started_ > 20000) return fail("Clock write not confirmed by readback");
       if (pump.sequence==read_sequence_) return Action::NONE;
@@ -69,6 +79,9 @@ class ClockSync {
   Action fail(const char *reason) { error_=reason; active_=false; return Action::FAILED; }
   bool active_{false}, waiting_ack_{false};
   int phase_{0}, value_{0};
+  unsigned retries_{0};
+  bool retry_wait_{false};
+  uint32_t retry_started_{0};
   uint32_t started_{0}, read_started_{0}, read_sequence_{0};
   const char *error_{nullptr};
 };

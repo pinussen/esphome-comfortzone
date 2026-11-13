@@ -36,5 +36,16 @@ inline void test_clock_sync() {
   assert(sync.poll(pump,ref,0x10U)==A::MINUTE);
   sync.acknowledged(true,3,0x20U); pump.sequence=4; pump.minute=12;
   assert(sync.poll(pump,ref,0x30U)==A::DONE);
-  sync.start(100); assert(sync.poll(pump,ref,90101)==A::FAILED);
+  // Only a failure before transmission may retry. Reference minute must be fresh.
+  sync.start(100); ref.minute=13; ref.second=0;
+  assert(sync.poll(pump,ref,100)==A::MINUTE);
+  sync.acknowledged(false,4,15100,true);
+  assert(sync.poll(pump,ref,20099)==A::NONE);
+  ref.minute=14;
+  assert(sync.poll(pump,ref,20100)==A::MINUTE && sync.value()==14);
+  sync.acknowledged(false,4,35100,true);
+  assert(sync.poll(pump,ref,40100)==A::MINUTE);
+  sync.acknowledged(false,4,55100,true);
+  assert(sync.poll(pump,ref,55101)==A::FAILED);
+  sync.start(100); assert(sync.poll(pump,ref,180101)==A::FAILED);
 }

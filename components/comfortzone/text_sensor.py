@@ -36,6 +36,7 @@ CONFIG_SCHEMA = cv.Schema(
     }
 )
 CONFIG_SCHEMA = CONFIG_SCHEMA.extend({
+    cv.Optional("raw_status"): text_sensor.text_sensor_schema(icon="mdi:code-braces"),
     cv.Optional("pump_datetime"): text_sensor.text_sensor_schema(icon="mdi:clock"),
     cv.Optional("last_write_result"): text_sensor.text_sensor_schema(icon="mdi:message-check"),
 })
@@ -47,7 +48,7 @@ TEXT_SENSORS_INIT = {
     CONF_HOT_WATER_PRIORITY_SETTING: "set_hot_water_priority_setting_sensor",
 }
 
-TEXT_SENSORS_INIT.update({"pump_datetime": "set_pump_datetime_sensor", "last_write_result": "set_last_write_result_sensor"})
+TEXT_SENSORS_INIT.update({"raw_status": "set_raw_status_sensor", "pump_datetime": "set_pump_datetime_sensor", "last_write_result": "set_last_write_result_sensor"})
 
 async def to_code(config):
     hub = await cg.get_variable(config[CONF_COMFORTZONE_ID])
