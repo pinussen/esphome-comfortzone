@@ -1,0 +1,219 @@
+{
+  "status": "offline evidence, not verified new field semantics",
+  "captures": [
+    {
+      "packets_scanned": 2532329,
+      "invalid_candidate_frames": 0,
+      "interpretation": "Candidate evidence only; counts include repeated/overlapping replies.",
+      "windows": [
+        {
+          "device": "656fde02",
+          "name": "extra_target_and_duration",
+          "address": "00:03ec",
+          "variants": [
+            {
+              "hex": "bc02b400",
+              "count": 68028,
+              "first": 1793217303.622148,
+              "last": 1793822069.157082,
+              "raw": "41444452078a656fde027972010203040b0800d2031e147eff74ff92ff88ffceffc4fff1ffe7ff2c01260226021e00bc02b40032000a0a260233005802016603d4fe2c0100002c0148038a02ee024803b603e803d4febc02000032003300d007a60e8813fa0034032602bc023403fc031a04fa004a01000008"
+            }
+          ]
+        },
+        {
+          "device": "656fde02",
+          "name": "post_extra_before_fan",
+          "address": "00:03f0",
+          "variants": [
+            {
+              "hex": "32000a0a26023300580201",
+              "count": 68028,
+              "first": 1793217303.622148,
+              "last": 1793822069.157082,
+              "raw": "41444452078a656fde027972010203040b0800d2031e147eff74ff92ff88ffceffc4fff1ffe7ff2c01260226021e00bc02b40032000a0a260233005802016603d4fe2c0100002c0148038a02ee024803b603e803d4febc02000032003300d007a60e8813fa0034032602bc023403fc031a04fa004a01000008"
+            }
+          ]
+        },
+        {
+          "device": "656fde02",
+          "name": "priority_word",
+          "address": "00:000e",
+          "variants": [
+            {
+              "hex": "5241",
+              "count": 67908,
+              "first": 1793217310.075857,
+              "last": 1793822082.580834,
+              "raw": "41444452078a656fde022a72010203040b08000000ca8e7242ae340617ff00001104ca52412b0140619d"
+            }
+          ]
+        }
+      ],
+      "source": "comfortzone-week-20261028-205459/data/capture.pcap"
+    },
+    {
+      "packets_scanned": 5851,
+      "invalid_candidate_frames": 0,
+      "interpretation": "Candidate evidence only; counts include repeated/overlapping replies.",
+      "windows": [
+        {
+          "device": "656fde02",
+          "name": "extra_target_and_duration",
+          "address": "00:03ec",
+          "variants": [
+            {
+              "hex": "bc02b400",
+              "count": 30,
+              "first": 1772922219.317768,
+              "last": 1772922272.799104,
+              "raw": "41444452078a656fde027972010203040b0800d2031e147eff74ff92ff88ffceffc4fff1ffe7ff2c01260226021e00bc02b40032000a0a260233005802026603d4fe2c0100002c0148038a02ee024803b603e803d4febc02000032000400d007a60e8813fa0034032602bc023403fc031a04fa004a010000ff"
+            }
+          ]
+        },
+        {
+          "device": "656fde02",
+          "name": "post_extra_before_fan",
+          "address": "00:03f0",
+          "variants": [
+            {
+              "hex": "32000a0a26023300580202",
+              "count": 30,
+              "first": 1772922219.317768,
+              "last": 1772922272.799104,
+              "raw": "41444452078a656fde027972010203040b0800d2031e147eff74ff92ff88ffceffc4fff1ffe7ff2c01260226021e00bc02b40032000a0a260233005802026603d4fe2c0100002c0148038a02ee024803b603e803d4febc02000032000400d007a60e8813fa0034032602bc023403fc031a04fa004a010000ff"
+            }
+          ]
+        },
+        {
+          "device": "656fde02",
+          "name": "priority_word",
+          "address": "00:000e",
+          "variants": [
+            {
+              "hex": "5241",
+              "count": 45,
+              "first": 1772922218.754209,
+              "last": 1772922272.291223,
+              "raw": "41444452078a656fde022a72010203040b08000000ca8e7242ae340617ff00001104ca52412b0140619d"
+            }
+          ]
+        }
+      ],
+      "source": "comfortzone-debug-1.pcap"
+    },
+    {
+      "packets_scanned": 13293,
+      "invalid_candidate_frames": 0,
+      "interpretation": "Candidate evidence only; counts include repeated/overlapping replies.",
+      "windows": [
+        {
+          "device": "656fde02",
+          "name": "extra_target_and_duration",
+          "address": "00:03ec",
+          "variants": [
+            {
+              "hex": "bc02b400",
+              "count": 69,
+              "first": 1772924001.900577,
+              "last": 1772924122.527805,
+              "raw": "41444452078a656fde027972010203040b0800d2031e147eff74ff92ff88ffceffc4fff1ffe7ff2c01260226021e00bc02b40032000a0a260233005802026603d4fe2c0100002c0148038a02ee024803b603e803d4febc02000032000400d007a60e8813fa0034032602bc023403fc031a04fa004a010000ff"
+            }
+          ]
+        },
+        {
+          "device": "656fde02",
+          "name": "post_extra_before_fan",
+          "address": "00:03f0",
+          "variants": [
+            {
+              "hex": "32000a0a26023300580202",
+              "count": 64,
+              "first": 1772924001.900577,
+              "last": 1772924122.527805,
+              "raw": "41444452078a656fde027972010203040b0800d2031e147eff74ff92ff88ffceffc4fff1ffe7ff2c01260226021e00bc02b40032000a0a260233005802026603d4fe2c0100002c0148038a02ee024803b603e803d4febc02000032000400d007a60e8813fa0034032602bc023403fc031a04fa004a010000ff"
+            },
+            {
+              "hex": "32000a0a26023300580201",
+              "count": 4,
+              "first": 1772924035.293883,
+              "last": 1772924035.299881,
+              "raw": "41444452078a656fde027972010203040b0800d2031e147eff74ff92ff88ffceffc4fff1ffe7ff2c01260226021e00bc02b40032000a0a260233005802016603d4fe2c0100002c0148038a02ee024803b603e803d4febc02000032000400d007a60e8813fa0034032602bc023403fc031a04fa004a01000039"
+            },
+            {
+              "hex": "32000a0a26023300580203",
+              "count": 1,
+              "first": 1772924040.552588,
+              "last": 1772924040.552588,
+              "raw": "41444452078a656fde027972010203040b0800d2031e147eff74ff92ff88ffceffc4fff1ffe7ff2c01260226021e00bc02b40032000a0a260233005802036603d4fe2c0100002c0148038a02ee024803b603e803d4febc02000032000400d007a60e8813fa0034032602bc023403fc031a04fa004a0100004a"
+            }
+          ]
+        },
+        {
+          "device": "656fde02",
+          "name": "priority_word",
+          "address": "00:000e",
+          "variants": [
+            {
+              "hex": "5241",
+              "count": 71,
+              "first": 1772924001.333178,
+              "last": 1772924122.016626,
+              "raw": "41444452078a656fde022a72010203040b08000000ca8e7242ae340617ff00001104ca52412b0140619d"
+            }
+          ]
+        }
+      ],
+      "source": "comfortzone-debug-2.pcap"
+    },
+    {
+      "packets_scanned": 4186,
+      "invalid_candidate_frames": 0,
+      "interpretation": "Candidate evidence only; counts include repeated/overlapping replies.",
+      "windows": [
+        {
+          "device": "656fde02",
+          "name": "extra_target_and_duration",
+          "address": "00:03ec",
+          "variants": [
+            {
+              "hex": "bc02b400",
+              "count": 29,
+              "first": 1773001973.618458,
+              "last": 1773001998.639843,
+              "raw": "41444452078a656fde027972010203040b0800d2031e147eff74ff92ff88ffceffc4fff1ffe7ff2c01260226021e00bc02b40032000a0a260233005802026603d4fe2c0100002c0148038a02ee024803b603e803d4febc02000032000300d007a60e8813fa0034032602bc023403fc031a04fa004a01000073"
+            }
+          ]
+        },
+        {
+          "device": "656fde02",
+          "name": "post_extra_before_fan",
+          "address": "00:03f0",
+          "variants": [
+            {
+              "hex": "32000a0a26023300580202",
+              "count": 29,
+              "first": 1773001973.618458,
+              "last": 1773001998.639843,
+              "raw": "41444452078a656fde027972010203040b0800d2031e147eff74ff92ff88ffceffc4fff1ffe7ff2c01260226021e00bc02b40032000a0a260233005802026603d4fe2c0100002c0148038a02ee024803b603e803d4febc02000032000300d007a60e8813fa0034032602bc023403fc031a04fa004a01000073"
+            }
+          ]
+        },
+        {
+          "device": "656fde02",
+          "name": "priority_word",
+          "address": "00:000e",
+          "variants": [
+            {
+              "hex": "5241",
+              "count": 18,
+              "first": 1773001973.110977,
+              "last": 1773001997.998834,
+              "raw": "41444452078a656fde022a72010203040b08000000ca8e7242ae340617ff00001104ca52412b0140619d"
+            }
+          ]
+        }
+      ],
+      "source": "comfortzone-debug-3.pcap"
+    }
+  ]
+}

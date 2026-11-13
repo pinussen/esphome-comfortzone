@@ -674,3 +674,36 @@ sparade tidpunkt, `2026-10-26 20:54:17 +0100`, utan en ny knapptryckning.
 Det verifierar återställningen över omstart. Kortet passerade startkontrollen,
 fortsatte ta emot pumpdata och hade 0 CRC-fel under efterkontrollen. Ett helt
 dygn utan HA-klient och nästa nattliga schemakörning har inte observerats här.
+
+## 2026-11-14: upstream 250 candidates checked against existing captures
+
+`upstream_candidates_v170.py` checks complete CRC-valid bank-0 reply windows
+without joining bytes from separate frames or devices. Its CRC cache is bounded
+at 8192 frames. Compact results and original example frames are preserved in
+`tests/v170_upstream_candidate_evidence.json`; no new full capture was created.
+
+Across the 2,532,329-packet week capture:
+
+- `00:000e` was always LE16 `0x4152` in 67,908 observations. Upstream 250
+  interprets the low two bits as hot-water priority; the older 180 examples
+  label this value normal. Still no controlled 170 panel validation. The word
+  does not distinguish the observed 70 C cycle from ordinary operation.
+- `00:03ec..03ef` stayed `bc02 b400` (70 C, 180 min) in 68,028 observations.
+  These are persistent configured values, not an indication that boost is on.
+- `00:03f0..03fa` stayed `32 00 0a 0a 26 02 33 00 58 02 01` in all 68,028
+  observations. The last byte is the already decoded fan mode at `03fa`.
+
+March captures 1/2/3 also show only `0x4152` and 70 C / 180 min. Their trailing
+block differs only at the known fan byte (1/2/3); the first ten bytes are the
+same as in the week capture. This supplies no dynamic legionella indicator.
+
+Applying 250's post-extra-time layout at 170 address `03f0` would produce a
+5 C legionella setpoint, 10/10 C thresholds and an overheat value of 1305.8 C.
+Those implausible values reject that direct layout translation. They do not
+rule out shifted fields elsewhere or differently encoded settings. No new HA
+control or live decoder field is introduced from these candidates.
+
+Next useful evidence: a controlled 170 panel change of hot-water priority and
+inspection of the legionella menu. Continue passive research on other status
+addresses; repeating this unchanged settings window cannot identify an active
+legionella bit.
