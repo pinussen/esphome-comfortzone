@@ -395,3 +395,24 @@ asynchronous write handling rather than reintroducing older debug workarounds.
 Firmware built 2026-11-13 22:57:03 +0100 was uploaded successfully to
 08:B6:1F:38:5A:C0 at 192.168.3.179. Field validation of the bounded clock
 retry behavior will require a subsequent busy-bus synchronization attempt.
+
+## Upstream merge 2026-11-14
+
+Library snapshot bbf87c27a2857f756d27c6e5bbc672c581c7c680 includes upstream
+qix67 master 317cfa6: protocol 250 tables/layouts, priority/cooling/alarm/filter
+controls and the MQTT example. Details and compatibility decisions are in the
+library's UPSTREAM-INTEGRATION.md. Protocol 170 remains selected for this EX50.
+
+Both CI matrices now include protocol 250. Synthetic tests check its status
+flags, alarms, CRC-valid bus freshness and asynchronous write staging; captured
+170 regressions continue to protect our pump's decoder. No 250 hardware has
+been tested here, and 250-specific library setters are not EX50 HA controls.
+
+Research leads: compare upstream's shared priority flags and named legionella
+parameters with 170 captures. Do not copy addresses or masks between versions
+without evidence. The upstream synchronous 250 retry strategy is isolated from
+our 170 asynchronous bus scheduler.
+
+Validation completed: all five protocol sanitizer suites and 42 Python tests
+passed. ESPHome 2026.10 / ESP-IDF 5.5.6 build succeeded: 853943 bytes,
+27.8% static RAM. This integration was built locally, not OTA-installed.
