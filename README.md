@@ -17,6 +17,11 @@ hardware diagnosis, deployment and live write tests.
 [PROTOKOLL-PLAN.md](PROTOKOLL-PLAN.md) sets out the staged migration to a shared
 register schema, generic decoding/writing and systematic capture analysis.
 
+[ENERGI-170.md](ENERGI-170.md) distinguishes electrical input from accumulated
+heat counters. In protocol 170, `Compressor energy` follows **heat output**, not
+electricity; `Hot water energy` also appears to include delivered heater heat.
+Do not substitute either for the daily electrical input sensors in HA Energy.
+
 ## What is supported
 
 - Heating and hot-water climate entities, temperatures, powers and cumulative counters.
