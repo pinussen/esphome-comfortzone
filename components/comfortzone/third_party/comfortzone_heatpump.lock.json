@@ -1,6 +1,6 @@
 {
   "repository": "https://github.com/pinussen/comfortzone_heatpump",
-  "commit": "b48a3f2b41dd52388fa9bd4616d1bb8f17666c4e",
+  "commit": "2d9636baec825f2a4c10e2d07f8640e5b269f782",
   "sha256": {
     "LICENSE": "589ed823e9a84c56feb95ac58e7cf384626b9cbf4fda2a907bc36e103de1bad2",
     "README.txt": "e3b40cd8b81c9ae9e6ffaa62901e462cf11b47a41e3279b08dc1095f1bc0b13f",
@@ -15,8 +15,8 @@
     "comfortzone_decoder_v170.cpp": "738e15ccfcf9eed7cbaef864bab2af06709a0195f4b0bb57bccc80faf296e5fa",
     "comfortzone_frame.h": "2d6b3737b501c00a90b2371c1c2a5ad226222719279cc08436a3e4f08ac87e20",
     "comfortzone_heatpump.cpp": "fe7f18f4452184b1cf73daede693d38061cf05ac0d877a1d76ef8b7ea22b517d",
-    "comfortzone_heatpump.h": "aeeaaab8a4116751add56cf8b51e36256b06e63b6ecde5c6ed1fb3c05303f551",
-    "comfortzone_operating_v170.h": "1cb5be911c8aa5581d7ad030c9cb16f6fc3b06f43a69ab4d5ccbc4eae33b4f01",
+    "comfortzone_heatpump.h": "d91a01fe32e6280a1f198192a52a0b207e6c5974a03c9c4ef14625afa8bfb4d5",
+    "comfortzone_operating_v170.h": "962e0595b3625f2a52eb04e39d607cf8cb798b7d2f23ce18cd3b8090ef148afd",
     "comfortzone_registers_v170.h": "4b270508c99e607b8b4f1a9de629caf3a1919e359817175e29e32644f8e8af81",
     "comfortzone_status.h": "211a8988fd7fddf93ad1b621bbc3d86182520776a0cc8431cc1b120f6109a9fe",
     "comfortzone_tools.h": "c8d827acc4ece7fc7f6b3a92267adc5d77008d295ec3c8fa796d0575c89edc56",
