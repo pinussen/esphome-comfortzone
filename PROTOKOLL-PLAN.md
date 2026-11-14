@@ -416,3 +416,27 @@ our 170 asynchronous bus scheduler.
 Validation completed: all five protocol sanitizer suites and 42 Python tests
 passed. ESPHome 2026.10 / ESP-IDF 5.5.6 build succeeded: 853943 bytes,
 27.8% static RAM. This integration was built locally, not OTA-installed.
+
+## 2026-11-14: panel session implemented
+
+The live panel session captured 5,064 packets and was stopped cleanly after
+testing. Original capture and timestamped user notes are under
+/home/bjwl/comfortzone-panel-20261114-152136; compact CRC-valid fixtures are
+committed in both repos. See PROTOKOLL-170.md for addresses, masks and limits.
+
+Added protocol-170 priority readback and a Low/Normal/High select using the
+panel's two-step masked write. Added fireplace binary readback and populated
+the existing extra-hot-water binary status. Readbacks expire after 15 seconds;
+the select retains its last confirmed option while its companion text sensor
+reports unknown on expiry. Neither an ACK nor compressor activity invents a
+requested-mode readback. Extra-HW ACK matching now accepts the observed status
+variation (08/0c) while retaining CRC, address, register and header checks.
+
+Validation: 44 Python tests passed; ASan/UBSan suites passed for 160, 170,
+180, 221 and 250. Added captured panel decoding, freshness, corrupt/short-frame,
+two-step priority and missing/corrupt ACK tests. ESPHome host clock/probe/write
+regressions passed. Full ESPHome 2026.10 / IDF 5.5.6 build succeeded: 854959
+bytes, 27.9% static RAM. Snapshot b48a3f2b41dd52388fa9bd4616d1bb8f17666c4e.
+Firmware not installed by this change; new priority control needs live ESP32
+verification after installation. CW heater allowed remains a recorded 1.1 C
+panel value, not a guessed writable field.

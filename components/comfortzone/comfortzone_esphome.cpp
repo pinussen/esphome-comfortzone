@@ -491,14 +491,19 @@ namespace esphome::comfortzone
     status.room_heating_in_progress.subscribe(on_bool_sensor_update, room_heating_in_progress_);
     status.additional_power_enabled.subscribe(on_bool_sensor_update, additional_power_enabled_);
 
+#if HP_PROTOCOL != HP_PROTOCOL_1_7
     status.extra_hot_water_setting.subscribe(on_bool_sensor_update, extra_hot_water_setting_);
+    status.fireplace_mode_enabled.subscribe(on_bool_sensor_update, fireplace_mode_);
+#endif
     status.defrost_enabled.subscribe(on_bool_sensor_update, defrost_enabled_);
 #endif
 
 #ifdef USE_TEXT_SENSOR
     status.compressor_activity.subscribe(on_compressor_activity_sensor_update, compressor_activity_);
     status.mode.subscribe(on_mode_sensor_update, mode_);
+#if HP_PROTOCOL != HP_PROTOCOL_1_7
     status.hot_water_priority_setting.subscribe(on_speed_sensor_update, hot_water_priority_setting_);
+#endif
 #endif
 
 
@@ -669,6 +674,22 @@ namespace esphome::comfortzone
 #if HP_PROTOCOL == HP_PROTOCOL_1_7
   void ComfortzoneComponent::publish_operating_170_() {
     const auto result = heatpump_->operating_170();
+    const auto &state = heatpump_->comfortzone_status;
+    const unsigned priority = static_cast<byte>(state.hot_water_priority_setting);
+    const bool priority_known = heatpump_->priority_fresh() && priority >= 1 && priority <= 3;
+#ifdef USE_SELECT
+    if (priority_select_ && priority_known) {
+      const char *value = priority == 1 ? "Low" : priority == 2 ? "Normal" : "High";
+      if (!priority_select_->has_state() || priority_select_->active_index().value_or(99) != priority - 1) priority_select_->publish_state(value);
+    }
+#endif
+#ifdef USE_TEXT_SENSOR
+    if (hot_water_priority_setting_) {
+      const char *value = priority_known ? (priority == 1 ? "low" : priority == 2 ? "normal" : "high") : "unknown";
+      if (!hot_water_priority_setting_->has_state() || hot_water_priority_setting_->state != value)
+        hot_water_priority_setting_->publish_state(value);
+    }
+#endif
 #ifdef USE_SENSOR
     publish_derived_state(heatpump_current_compressor_input_power_, result.input_power);
     publish_derived_state(heatpump_current_compressor_heating_input_power_, result.heating_input);
@@ -699,6 +720,8 @@ namespace esphome::comfortzone
       if (known) sensor->publish_state(value);
       else if (sensor->has_state()) sensor->invalidate_state();
     };
+    publish(extra_hot_water_setting_, heatpump_->extra_water_fresh(), state.extra_hot_water_setting);
+    publish(fireplace_mode_, heatpump_->fireplace_fresh(), state.fireplace_mode_enabled);
     publish(room_heating_in_progress_, result.production_known, result.mode == CZMD_ROOM_HEATING);
     publish(hot_water_production_, result.production_known, result.mode == CZMD_HOT_WATER);
 #endif

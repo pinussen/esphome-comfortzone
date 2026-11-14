@@ -78,6 +78,7 @@ class EspHomeRS485Interface;
     void set_zero_byte_idle(bool enabled) { zero_byte_idle_ = enabled; }
 
 #ifdef USE_SELECT
+    void set_priority_select(ComfortzoneFanSelect *entity) { priority_select_ = entity; entity->set_parent(this); }
     void set_fan_select(ComfortzoneFanSelect *entity) { fan_select_ = entity; entity->set_parent(this); }
 #endif
 #ifdef USE_NUMBER
@@ -135,6 +136,7 @@ class EspHomeRS485Interface;
     void set_room_heating_in_progress_sensor(binary_sensor::BinarySensor *room_heating_in_progress);
     void set_additional_power_enabled_sensor(binary_sensor::BinarySensor *additional_power_enabled);
     void set_defrost_enabled_sensor(binary_sensor::BinarySensor *defrost_enabled);
+    void set_fireplace_mode_sensor(binary_sensor::BinarySensor *sensor) { fireplace_mode_ = sensor; }
     void set_extra_hot_water_setting_sensor(binary_sensor::BinarySensor *extra_hot_water_setting);
 #endif
 
@@ -180,6 +182,7 @@ class EspHomeRS485Interface;
   private:
 #ifdef USE_SELECT
     ComfortzoneFanSelect *fan_select_{nullptr};
+    ComfortzoneFanSelect *priority_select_{nullptr};
 #endif
 #ifdef USE_NUMBER
     ComfortzoneCurveNumber *curve_number_{nullptr};
@@ -287,6 +290,7 @@ class EspHomeRS485Interface;
     binary_sensor::BinarySensor *additional_power_enabled_{nullptr}; // true = resistor is enabled, false = resistor is disabled (proto: 1.60, 1.80)
 
     binary_sensor::BinarySensor *defrost_enabled_{nullptr};         // true = defrost in progress, false = no defrost in progress (proto: 1.60, 1.80)
+    binary_sensor::BinarySensor *fireplace_mode_{nullptr};
     binary_sensor::BinarySensor *extra_hot_water_setting_{nullptr}; // true = on, false = off
 #endif
 

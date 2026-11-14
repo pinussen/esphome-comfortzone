@@ -14,9 +14,11 @@ class ComfortzoneComponent;
 #ifdef USE_SELECT
 class ComfortzoneFanSelect : public select::Select {
  public:
+  void set_priority(bool value) { priority_ = value; }
   void set_parent(ComfortzoneComponent *parent) { parent_ = parent; }
  protected:
   void control(const std::string &value) override;
+  bool priority_{false};
   ComfortzoneComponent *parent_{nullptr};
 };
 #endif

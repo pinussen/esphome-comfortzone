@@ -4,7 +4,7 @@ namespace esphome::comfortzone {
 void ComfortzoneFanSelect::control(const std::string &value) {
   if (!parent_) return;
   const int setting = value == "Low" ? 1 : value == "Normal" ? 2 : value == "High" ? 3 : 0;
-  if (setting) parent_->request_write(comfortzone_heatpump::WriteKind::FAN_SPEED, setting);
+  if (setting) parent_->request_write(priority_ ? comfortzone_heatpump::WriteKind::HOT_WATER_PRIORITY : comfortzone_heatpump::WriteKind::FAN_SPEED, setting);
 }
 #endif
 #ifdef USE_NUMBER

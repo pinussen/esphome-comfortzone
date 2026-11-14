@@ -49,6 +49,7 @@ CONFIG_SCHEMA = cv.Schema(
             icon=ICON_GRAIN,
             device_class=DEVICE_CLASS_RUNNING,
         ),
+        cv.Optional("fireplace_mode"): binary_sensor.binary_sensor_schema(icon="mdi:fireplace"),
         cv.Optional(CONF_EXTRA_HOT_WATER_SETTING): binary_sensor.binary_sensor_schema(
             icon=ICON_HEATING_COIL,
             device_class=DEVICE_CLASS_POWER,
@@ -56,6 +57,7 @@ CONFIG_SCHEMA = cv.Schema(
     }
 )
 BINARY_SENSORS_INIT = {
+    "fireplace_mode": "set_fireplace_mode_sensor",
     CONF_FILTER_ALARM: "set_filter_alarm_sensor",
     CONF_HOT_WATER_PRODUCTION: "set_hot_water_production_sensor",
     CONF_ROOM_HEATING_IN_PROGRESS: "set_room_heating_in_progress_sensor",

@@ -42,6 +42,14 @@ text_sensor:
 select:
   - platform: comfortzone
     name: "Ventilation mode"
+  - platform: comfortzone
+    name: "Hot water priority"
+    control: hot_water_priority
+    icon: mdi:water-thermometer
+binary_sensor:
+  - platform: comfortzone
+    fireplace_mode:
+      name: "Fireplace mode active"
 number:
   - platform: comfortzone
     name: "Heating curve"

@@ -4,6 +4,7 @@
 #include "frequency_fixture.h"
 #include "status_fixture.h"
 #include "operating_test.h"
+#include "panel_controls_test.h"
 #ifdef TEST_ESPHOME_PROBE
 #include "../components/comfortzone/comfortzone_probe.h"
 #include "../components/comfortzone/comfortzone_energy.h"
@@ -13,6 +14,7 @@
 int main(int argc, char **argv) {
   test_zero_byte_idle();
   test_operating();
+  test_panel_controls();
 #ifdef TEST_ESPHOME_PROBE
   test_clock_sync();
   {
