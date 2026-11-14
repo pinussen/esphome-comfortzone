@@ -94,3 +94,88 @@ and search unclassified register ranges for a genuine cumulative electrical
 input counter. If none is found, ESPHome integration cannot reconstruct an
 unobserved outage. Exposing clearer heat labels/derived heat totals is a
 separate change requiring care with existing HA entity IDs and statistics.
+
+
+## Allocation audit and correction, 2026-11-14
+
+`allocation_audit_v170.py` reproduces the status/power association rules at
+message timestamps. It splits integration at each expiry and reports the
+reason why otherwise-known electrical input cannot be allocated. This is
+an event-time left-hold approximation, not an exact simulation of the ESPHome
+one-second right-integration schedule or historical HA statistics.
+
+Replaying the complete week with the 45-second freshness bound:
+
+| Rule | Total compressor electricity | Allocated heating + water | Allocated fraction |
+| --- | --- | --- | --- |
+| Previous pairing overwritten at every power reply | 101.422 kWh | 59.889 kWh | 59.05% |
+| Preserve a previously confirmed, unchanged fresh status | 101.422 kWh | 95.969 kWh | 94.62% |
+| Experimental 45-second initial pairing (not implemented) | 101.422 kWh | 96.319 kWh | 94.97% |
+
+The old two-second pairing test accounted for 38.579 kWh of excluded input.
+This explains a large total-versus-parts discrepancy without any excess power
+measurement: known input continued into the total while both allocations
+became unavailable. The raw capture can also miss packets in forwarding, so
+these percentages are evidence from replay, not a guaranteed live loss rate.
+
+The implemented correction preserves a confirmed association only while
+status is unchanged and no older than 45 seconds. A new or changed status
+still needs a power reply within 2 seconds. No new status interpretations,
+heater assumptions or relaxed initial pairing were added.
+
+After the correction, replay still leaves 5.453 kWh unallocated: 3.101 kWh
+under the heater-active guard, 1.038 kWh lacking an initial close pair,
+0.836 kWh under unmapped profiles and 0.478 kWh with expired status. These
+amounts are not silently assigned to heating or hot water. The firmware
+update cannot repair past daily-counter omissions.
+
+```sh
+python3 allocation_audit_v170.py /path/to/capture.pcap --output /tmp/allocation.json
+python3 scan_energy_counters_v170.py /path/to/capture.pcap --sample-s 300 --output /tmp/candidates.json
+```
+
+
+### Sampling-method check
+
+On 67,802 consecutive power intervals no longer than 45 s in the same week,
+left integration gives 98.5006 kWh and right integration 98.4477 kWh, a 0.054%
+difference. These intervals cover 593,781.52 s; 210 longer gaps are excluded
+from both methods, so this is not the whole-week 101.422 kWh integral. This
+comparison does not prove meter accuracy or rule out missing samples, but
+shows that left-versus-right integration is far too small to explain the
+reported total-versus-parts discrepancy. ESPHome currently uses one-second
+right integration of its latest valid input-power state.
+
+
+### Search for an independent electrical energy counter
+
+The full week was scanned across 39 observed reply ranges in banks 0, 1, 3,
+4 and 5. At every byte offset, complete unsigned 16/24/32/64-bit fields and
+32/64-bit floating-point fields were interpreted in both endian orders.
+Fields were not assembled across replies or mixed between endpoints.
+
+The search examined 37,579 numeric interpretations (not 37,579 independent
+registers). Range snapshots were sampled no more than once per 300 seconds.
+5,761 interpretations had at least 12 increases and 12 well-covered half-hour
+windows for comparison. Of these, 109 had no observed decreases and 305 had
+at most eight. Very coarse counters, other encodings and unobserved registers
+are not ruled out by this search.
+
+No new credible cumulative compressor electricity counter emerged. The best
+monotone input-correlated field is already-known `05:002c` compressor heat:
+its fitted relative RMS increment error is 7.07% against input but 0.88%
+against output. Byte-shifted/truncated/float interpretations of those same
+bytes are aliases, not independent discoveries. Compressor-runtime fields
+fit running hours much better than input; other near-monotone candidates
+outside the known counter block fit elapsed time better than electrical input.
+A fitted scale alone is insufficient evidence of energy semantics.
+
+Full results: `/home/bjwl/comfortzone-energy-analysis-20261114/counter-search.json`.
+The original 60-second-resolution attempt was stopped to bound processing
+cost; the completed, reported scan uses 300 seconds. The scanner tests include
+an unknown synthetic electrical counter that must be found and distinguished
+from elapsed time, plus CRC/source separation and reset handling.
+
+The practical next step is deploying the tested pairing-retention fix and
+comparing **new increments over the same interval**. Existing daily deficits
+will remain; waiting alone or renaming heat counters does not fill them.
